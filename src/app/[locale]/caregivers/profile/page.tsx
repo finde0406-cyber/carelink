@@ -5,16 +5,20 @@ import { useTranslations, useLocale } from 'next-intl'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import Link from 'next/link'
+import AvailabilityGrid, { AvailItem } from '@/components/caregivers/AvailabilityGrid'
 
 export default function CaregiverProfilePage() {
   const t = useTranslations('caregiverProfile')
+  const tAvail = useTranslations('availability')
   const locale = useLocale()
   const router = useRouter()
   const supabase = createClient()
 
-  const [loading, setLoading] = useState(false)
+  const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null)
+  const [caregiverProfileId, setCaregiverProfileId] = useState<string | null>(null)
+  const [availability, setAvailability] = useState<AvailItem[]>([])
   const [form, setForm] = useState({
     license_type: '',
     license_number: '',
@@ -27,17 +31,17 @@ export default function CaregiverProfilePage() {
 
   useEffect(() => {
     async function load() {
-      setLoading(true)
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) { router.push(`/${locale}/auth/login`); return }
 
       const { data } = await supabase
         .from('caregiver_profiles')
-        .select('*')
+        .select('*, caregiver_availability(day_of_week, time_slot)')
         .eq('user_id', user.id)
         .single()
 
       if (data) {
+        setCaregiverProfileId(data.id)
         setForm({
           license_type: data.license_type || '',
           license_number: data.license_number || '',
@@ -47,6 +51,7 @@ export default function CaregiverProfilePage() {
           bio: data.bio || '',
           available: data.available ?? true,
         })
+        setAvailability(data.caregiver_availability || [])
       }
       setLoading(false)
     }
@@ -61,16 +66,34 @@ export default function CaregiverProfilePage() {
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return
 
-    const { error } = await supabase
+    const { data: savedProfile, error } = await supabase
       .from('caregiver_profiles')
       .upsert({ user_id: user.id, ...form }, { onConflict: 'user_id' })
+      .select('id')
+      .single()
 
     if (error) {
       setMessage({ type: 'error', text: t('error') })
-    } else {
-      setMessage({ type: 'success', text: t('success') })
-      setTimeout(() => router.push(`/${locale}/dashboard`), 1200)
+      setSaving(false)
+      return
     }
+
+    const profileId = savedProfile?.id ?? caregiverProfileId
+    if (profileId) {
+      await supabase.from('caregiver_availability').delete().eq('caregiver_id', profileId)
+      if (availability.length > 0) {
+        await supabase.from('caregiver_availability').insert(
+          availability.map(a => ({
+            caregiver_id: profileId,
+            day_of_week: a.day_of_week,
+            time_slot: a.time_slot,
+          }))
+        )
+      }
+    }
+
+    setMessage({ type: 'success', text: t('success') })
+    setTimeout(() => router.push(`/${locale}/dashboard`), 1200)
     setSaving(false)
   }
 
@@ -200,6 +223,19 @@ export default function CaregiverProfilePage() {
                 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100 transition resize-none"
             />
             <p className="text-xs text-gray-400 mt-1 text-right">{form.bio.length}자</p>
+          </div>
+
+          {/* 근무 가능 시간 */}
+          <div className="border border-gray-100 rounded-xl p-4 bg-gray-50">
+            <div className="mb-3">
+              <h3 className="text-sm font-semibold text-gray-800">{tAvail('title')}</h3>
+              <p className="text-xs text-gray-400 mt-0.5">{tAvail('subtitle')}</p>
+            </div>
+            <AvailabilityGrid
+              availability={availability}
+              editable
+              onChange={setAvailability}
+            />
           </div>
 
           {/* 구직 중 여부 */}

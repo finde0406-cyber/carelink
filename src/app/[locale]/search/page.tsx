@@ -6,9 +6,10 @@ import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import Link from 'next/link'
 
+interface AvailItem { day_of_week: number; time_slot: string }
+
 interface CaregiverCard {
   id: string
-  user_id: string
   license_type: string
   experience_years: number
   region: string
@@ -18,7 +19,10 @@ interface CaregiverCard {
   rating: number
   review_count: number
   profiles: { full_name: string } | null
+  caregiver_availability: AvailItem[]
 }
+
+const DAY_SHORT = ['월', '화', '수', '목', '금', '토', '일']
 
 export default function SearchPage() {
   const t = useTranslations('search')
@@ -46,7 +50,7 @@ export default function SearchPage() {
 
     let query = supabase
       .from('caregiver_profiles')
-      .select('*, profiles(full_name)')
+      .select('*, profiles(full_name), caregiver_availability(day_of_week, time_slot)')
       .eq('available', true)
 
     if (region.trim()) {
@@ -66,7 +70,7 @@ export default function SearchPage() {
             Care<span className="text-amber-400">Link</span>
           </Link>
           <Link href={`/${locale}/dashboard`} className="text-sm text-gray-500 hover:text-gray-700">
-            ← 대시보드
+            {t('backToDashboard')}
           </Link>
         </div>
       </header>
@@ -110,39 +114,70 @@ export default function SearchPage() {
 
         {results.length > 0 && (
           <div className="grid sm:grid-cols-2 gap-4">
-            {results.map(c => (
-              <div key={c.id} className="bg-white border border-gray-200 rounded-2xl p-6 hover:shadow-md transition">
-                <div className="flex items-start justify-between mb-3">
-                  <div>
-                    <h3 className="font-bold text-gray-900 text-base">
-                      {c.profiles?.full_name || '—'}
-                    </h3>
-                    <p className="text-sm text-emerald-700 font-medium mt-0.5">{c.license_type}</p>
+            {results.map(c => {
+              const availDays = new Set(c.caregiver_availability?.map(a => a.day_of_week) ?? [])
+              return (
+                <div key={c.id} className="bg-white border border-gray-200 rounded-2xl p-6 hover:shadow-md transition flex flex-col">
+                  {/* Header */}
+                  <div className="flex items-start justify-between mb-2">
+                    <div>
+                      <h3 className="font-bold text-gray-900 text-base">
+                        {c.profiles?.full_name || '—'}
+                      </h3>
+                      <p className="text-sm text-emerald-700 font-medium mt-0.5">{c.license_type}</p>
+                    </div>
+                    <span className={`shrink-0 text-xs font-semibold px-2.5 py-1 rounded-full
+                      ${c.available ? 'bg-emerald-100 text-emerald-700' : 'bg-gray-100 text-gray-500'}`}>
+                      {c.available ? t('available') : t('unavailable')}
+                    </span>
                   </div>
-                  <span className={`text-xs font-semibold px-2.5 py-1 rounded-full
-                    ${c.available ? 'bg-emerald-100 text-emerald-700' : 'bg-gray-100 text-gray-500'}`}>
-                    {c.available ? t('available') : t('unavailable')}
-                  </span>
+
+                  <p className="text-sm text-gray-600 line-clamp-2 mb-3">{c.bio}</p>
+
+                  {/* Stats */}
+                  <div className="flex flex-wrap gap-3 text-xs text-gray-500 mb-3">
+                    <span>📍 {c.region}</span>
+                    <span>🕐 {c.experience_years}{t('years')}</span>
+                    <span>💰 {c.hourly_rate.toLocaleString()}{t('perHour')}</span>
+                    {c.review_count > 0 && (
+                      <span>⭐ {c.rating} ({c.review_count}{t('reviews')})</span>
+                    )}
+                  </div>
+
+                  {/* Availability dots */}
+                  <div className="flex gap-1 mb-4">
+                    {DAY_SHORT.map((label, i) => (
+                      <div key={i}
+                        className={`flex-1 h-6 rounded-md text-[10px] font-bold flex items-center justify-center
+                          transition
+                          ${availDays.has(i)
+                            ? i >= 5
+                              ? 'bg-emerald-100 text-emerald-600'
+                              : 'bg-emerald-500 text-white'
+                            : 'bg-gray-100 text-gray-300'
+                          }`}>
+                        {label}
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* Buttons */}
+                  <div className="flex gap-2 mt-auto">
+                    <Link
+                      href={`/${locale}/caregivers/${c.id}`}
+                      className="flex-1 text-center border border-emerald-600 text-emerald-700 py-2.5 rounded-xl
+                        text-sm font-semibold hover:bg-emerald-50 transition">
+                      {t('viewDetail')}
+                    </Link>
+                    <button
+                      className="flex-1 bg-emerald-700 text-white py-2.5 rounded-xl text-sm font-semibold
+                        hover:bg-emerald-800 transition">
+                      {t('contact')}
+                    </button>
+                  </div>
                 </div>
-
-                <p className="text-sm text-gray-600 line-clamp-2 mb-4">{c.bio}</p>
-
-                <div className="flex flex-wrap gap-3 text-xs text-gray-500 mb-4">
-                  <span>📍 {c.region}</span>
-                  <span>🕐 {c.experience_years}{t('years')}</span>
-                  <span>💰 {c.hourly_rate.toLocaleString()}{t('perHour')}</span>
-                  {c.review_count > 0 && (
-                    <span>⭐ {c.rating} ({c.review_count}{t('reviews')})</span>
-                  )}
-                </div>
-
-                <button
-                  className="w-full border border-emerald-600 text-emerald-700 py-2.5 rounded-xl text-sm font-semibold
-                    hover:bg-emerald-50 transition">
-                  {t('contact')}
-                </button>
-              </div>
-            ))}
+              )
+            })}
           </div>
         )}
       </main>

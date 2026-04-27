@@ -116,6 +116,21 @@
     "success": "プロフィールが保存されました！",
     "error": "保存中にエラーが発生しました。"
   },
+  "availability": {
+    "title": "対応可能時間",
+    "subtitle": "対応可能な時間帯をクリックして選択してください",
+    "days": {
+      "mon": "月", "tue": "火", "wed": "水", "thu": "木",
+      "fri": "金", "sat": "土", "sun": "日"
+    },
+    "slots": {
+      "morning": "午前", "afternoon": "午後", "evening": "夜間"
+    },
+    "times": {
+      "morning": "09:00–13:00", "afternoon": "13:00–18:00", "evening": "18:00–22:00"
+    },
+    "none": "対応可能時間が登録されていません"
+  },
   "search": {
     "title": "介護士を探す",
     "subtitle": "地域と条件を選んで、適切な介護士を見つけましょう",
@@ -129,7 +144,21 @@
     "reviews": "口コミ",
     "contact": "連絡する",
     "available": "求職中",
-    "unavailable": "対応不可"
+    "unavailable": "対応不可",
+    "backToDashboard": "← ダッシュボード",
+    "viewDetail": "詳しく見る"
+  },
+  "caregiverDetail": {
+    "back": "← 一覧へ戻る",
+    "perHour": "ウォン/時",
+    "years": "年経験",
+    "reviewsUnit": "件の口コミ",
+    "available": "求職中",
+    "unavailable": "対応不可",
+    "bioTitle": "自己紹介",
+    "scheduleTitle": "対応可能時間",
+    "contact": "連絡する",
+    "contactSoon": "チャット機能は近日公開予定です。現在準備中です。"
   },
   "dashboard": {
     "welcome": "こんにちは、",

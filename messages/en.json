@@ -116,6 +116,21 @@
     "success": "Profile saved!",
     "error": "An error occurred while saving."
   },
+  "availability": {
+    "title": "Available Hours",
+    "subtitle": "Click to set your available time slots",
+    "days": {
+      "mon": "Mon", "tue": "Tue", "wed": "Wed", "thu": "Thu",
+      "fri": "Fri", "sat": "Sat", "sun": "Sun"
+    },
+    "slots": {
+      "morning": "Morning", "afternoon": "Afternoon", "evening": "Evening"
+    },
+    "times": {
+      "morning": "09:00–13:00", "afternoon": "13:00–18:00", "evening": "18:00–22:00"
+    },
+    "none": "No availability set"
+  },
   "search": {
     "title": "Find a Caregiver",
     "subtitle": "Search by region and conditions to find the right caregiver",
@@ -129,7 +144,21 @@
     "reviews": "reviews",
     "contact": "Contact",
     "available": "Available",
-    "unavailable": "Unavailable"
+    "unavailable": "Unavailable",
+    "backToDashboard": "← Dashboard",
+    "viewDetail": "View Details"
+  },
+  "caregiverDetail": {
+    "back": "← Back to list",
+    "perHour": "KRW/hr",
+    "years": "yrs exp",
+    "reviewsUnit": "reviews",
+    "available": "Available",
+    "unavailable": "Unavailable",
+    "bioTitle": "About Me",
+    "scheduleTitle": "Available Hours",
+    "contact": "Contact",
+    "contactSoon": "Chat feature coming soon. Currently in preparation."
   },
   "dashboard": {
     "welcome": "Hello,",

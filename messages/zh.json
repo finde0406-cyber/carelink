@@ -116,6 +116,21 @@
     "success": "资料已保存！",
     "error": "保存时发生错误。"
   },
+  "availability": {
+    "title": "可工作时间",
+    "subtitle": "点击选择您的可工作时间段",
+    "days": {
+      "mon": "一", "tue": "二", "wed": "三", "thu": "四",
+      "fri": "五", "sat": "六", "sun": "日"
+    },
+    "slots": {
+      "morning": "上午", "afternoon": "下午", "evening": "晚上"
+    },
+    "times": {
+      "morning": "09:00–13:00", "afternoon": "13:00–18:00", "evening": "18:00–22:00"
+    },
+    "none": "暂无可用时间"
+  },
   "search": {
     "title": "寻找护理人员",
     "subtitle": "按地区和条件搜索合适的护理人员",
@@ -129,7 +144,21 @@
     "reviews": "评价",
     "contact": "联系",
     "available": "招募中",
-    "unavailable": "暂不可用"
+    "unavailable": "暂不可用",
+    "backToDashboard": "← 仪表盘",
+    "viewDetail": "查看详情"
+  },
+  "caregiverDetail": {
+    "back": "← 返回列表",
+    "perHour": "韩元/小时",
+    "years": "年经验",
+    "reviewsUnit": "条评价",
+    "available": "招募中",
+    "unavailable": "暂不可用",
+    "bioTitle": "自我介绍",
+    "scheduleTitle": "可工作时间",
+    "contact": "联系",
+    "contactSoon": "聊天功能即将推出，敬请期待。"
   },
   "dashboard": {
     "welcome": "您好，",
