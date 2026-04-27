@@ -94,6 +94,43 @@
       "login": "Sign in"
     }
   },
+  "caregiverProfile": {
+    "title": "Create Profile",
+    "editTitle": "Edit Profile",
+    "subtitle": "Fill in your info so families can find you",
+    "licenseType": "License Type",
+    "licenseTypePlaceholder": "e.g. Certified Caregiver",
+    "licenseNumber": "License Number",
+    "licenseNumberPlaceholder": "Enter your license number",
+    "experience": "Years of Experience",
+    "experiencePlaceholder": "0",
+    "region": "Service Area",
+    "regionPlaceholder": "e.g. Seoul, Gangnam-gu",
+    "hourlyRate": "Hourly Rate (KRW)",
+    "hourlyRatePlaceholder": "15000",
+    "bio": "Introduction",
+    "bioPlaceholder": "Tell families about your experience, specialties, and care style (min. 50 chars)",
+    "available": "Currently available for hire",
+    "submit": "Save Profile",
+    "loading": "Saving...",
+    "success": "Profile saved!",
+    "error": "An error occurred while saving."
+  },
+  "search": {
+    "title": "Find a Caregiver",
+    "subtitle": "Search by region and conditions to find the right caregiver",
+    "regionLabel": "Region",
+    "regionPlaceholder": "Enter a region",
+    "searchBtn": "Search",
+    "noResults": "No results found",
+    "noResultsDesc": "Try a different region or condition",
+    "perHour": "KRW/hr",
+    "years": "yrs exp",
+    "reviews": "reviews",
+    "contact": "Contact",
+    "available": "Available",
+    "unavailable": "Unavailable"
+  },
   "dashboard": {
     "welcome": "Hello,",
     "welcomeSuffix": "!",

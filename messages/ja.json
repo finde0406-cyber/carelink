@@ -94,6 +94,43 @@
       "login": "ログイン"
     }
   },
+  "caregiverProfile": {
+    "title": "プロフィール登録",
+    "editTitle": "プロフィール編集",
+    "subtitle": "情報を入力すると、ご家族があなたを見つけられます",
+    "licenseType": "資格の種類",
+    "licenseTypePlaceholder": "例：介護福祉士",
+    "licenseNumber": "資格番号",
+    "licenseNumberPlaceholder": "資格番号を入力してください",
+    "experience": "経験年数",
+    "experiencePlaceholder": "0",
+    "region": "活動地域",
+    "regionPlaceholder": "例：東京都 渋谷区",
+    "hourlyRate": "時給（ウォン）",
+    "hourlyRatePlaceholder": "15000",
+    "bio": "自己紹介",
+    "bioPlaceholder": "経験・得意分野・ケアのスタイルを紹介してください（50文字以上）",
+    "available": "現在求職中",
+    "submit": "保存する",
+    "loading": "保存中...",
+    "success": "プロフィールが保存されました！",
+    "error": "保存中にエラーが発生しました。"
+  },
+  "search": {
+    "title": "介護士を探す",
+    "subtitle": "地域と条件を選んで、適切な介護士を見つけましょう",
+    "regionLabel": "地域",
+    "regionPlaceholder": "地域を入力してください",
+    "searchBtn": "検索",
+    "noResults": "結果が見つかりませんでした",
+    "noResultsDesc": "別の地域や条件で再度検索してください",
+    "perHour": "ウォン/時",
+    "years": "年経験",
+    "reviews": "口コミ",
+    "contact": "連絡する",
+    "available": "求職中",
+    "unavailable": "対応不可"
+  },
   "dashboard": {
     "welcome": "こんにちは、",
     "welcomeSuffix": "さん！",

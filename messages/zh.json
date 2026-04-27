@@ -94,6 +94,43 @@
       "login": "登录"
     }
   },
+  "caregiverProfile": {
+    "title": "创建资料",
+    "editTitle": "编辑资料",
+    "subtitle": "填写您的信息，让家庭找到您",
+    "licenseType": "资质类型",
+    "licenseTypePlaceholder": "例：认证护理人员",
+    "licenseNumber": "资质编号",
+    "licenseNumberPlaceholder": "请输入您的资质编号",
+    "experience": "从业年限",
+    "experiencePlaceholder": "0",
+    "region": "服务地区",
+    "regionPlaceholder": "例：首尔 江南区",
+    "hourlyRate": "时薪（韩元）",
+    "hourlyRatePlaceholder": "15000",
+    "bio": "自我介绍",
+    "bioPlaceholder": "介绍您的经验、专长和护理方式（至少50字）",
+    "available": "目前正在求职",
+    "submit": "保存资料",
+    "loading": "保存中...",
+    "success": "资料已保存！",
+    "error": "保存时发生错误。"
+  },
+  "search": {
+    "title": "寻找护理人员",
+    "subtitle": "按地区和条件搜索合适的护理人员",
+    "regionLabel": "地区",
+    "regionPlaceholder": "请输入地区",
+    "searchBtn": "搜索",
+    "noResults": "未找到结果",
+    "noResultsDesc": "请尝试其他地区或条件",
+    "perHour": "韩元/小时",
+    "years": "年经验",
+    "reviews": "评价",
+    "contact": "联系",
+    "available": "招募中",
+    "unavailable": "暂不可用"
+  },
   "dashboard": {
     "welcome": "您好，",
     "welcomeSuffix": "！",
