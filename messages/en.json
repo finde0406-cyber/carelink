@@ -1,0 +1,112 @@
+{
+  "nav": {
+    "findCaregivers": "Find Caregivers",
+    "forCaregivers": "For Caregivers",
+    "signIn": "Sign In",
+    "getStarted": "Get Started"
+  },
+  "hero": {
+    "badge": "Now accepting early access",
+    "title1": "Connect",
+    "title2": "Connect",
+    "titleConnect": "People.",
+    "desc": "CareLink connects families with verified caregivers and trusted specialists — all in one platform, anywhere in the world.",
+    "cta1": "Get Started — It's Free",
+    "cta2": "Find a Caregiver",
+    "stat1Num": "10M+",
+    "stat1Label": "Seniors needing care globally",
+    "stat2Num": "2×",
+    "stat2Label": "Caregiver demand by 2030",
+    "stat3Num": "$1.3T",
+    "stat3Label": "Global care economy"
+  },
+  "howItWorks": {
+    "tag": "How It Works",
+    "title": "Simple. Fast. Trusted.",
+    "desc": "Three steps to connect with the right care professional in your area.",
+    "step1Title": "1. Post Your Need",
+    "step1Desc": "Describe the care you need — daily assistance, medical support, or specialist advice.",
+    "step2Title": "2. Get Matched",
+    "step2Desc": "We match you with verified professionals nearby based on qualifications and reviews.",
+    "step3Title": "3. Book & Pay Safely",
+    "step3Desc": "Confirm your booking and pay securely. Funds are released only after service is complete."
+  },
+  "services": {
+    "tag": "Our Services",
+    "title": "One Platform, Every Care Need",
+    "desc": "From daily caregiving to complex estate matters — CareLink covers the full journey.",
+    "care": {
+      "title": "Caregiver Matching",
+      "desc": "Find certified caregivers for your loved ones. Background-checked, reviewed, and ready to help.",
+      "tags": ["Home Care", "Medical Assist", "Dementia Care", "Respite Care"]
+    },
+    "estate": {
+      "title": "Estate & Inheritance",
+      "desc": "Connect with trusted attorneys, tax advisors, and estate planners for professional guidance.",
+      "tags": ["Will Planning", "Tax Consult", "Asset Transfer", "Legal Advice"]
+    }
+  },
+  "cta": {
+    "title": "Ready to Find the Right Care?",
+    "desc": "Join thousands of families and caregivers already on CareLink.",
+    "button": "Get Started Free"
+  },
+  "footer": {
+    "tagline": "Connecting care, everywhere.",
+    "rights": "© 2025 CareLink. All rights reserved."
+  },
+  "auth": {
+    "login": {
+      "title": "Sign In",
+      "subtitle": "Welcome back to CareLink",
+      "email": "Email",
+      "password": "Password",
+      "submit": "Sign In",
+      "loading": "Signing in...",
+      "error": "Invalid email or password.",
+      "noAccount": "Don't have an account?",
+      "signup": "Sign up"
+    },
+    "signup": {
+      "title": "Create Account",
+      "subtitle": "Start for free",
+      "roleTitle": "Who are you?",
+      "roleSubtitle": "Select your role",
+      "familyLabel": "Family / Guardian",
+      "familyDesc": "Looking for a caregiver or specialist",
+      "caregiverLabel": "Caregiver",
+      "caregiverDesc": "I want to provide care services",
+      "specialistLabel": "Specialist",
+      "specialistDesc": "I'm an estate, legal or tax specialist",
+      "next": "Next",
+      "back": "← Back",
+      "infoTitle": "Create your account",
+      "infoSubtitle": "Enter your information",
+      "name": "Full Name",
+      "namePlaceholder": "John Doe",
+      "email": "Email",
+      "password": "Password",
+      "passwordHint": "At least 6 characters",
+      "submit": "Create Account",
+      "loading": "Creating account...",
+      "error": "An error occurred. Please try again.",
+      "hasAccount": "Already have an account?",
+      "login": "Sign in"
+    }
+  },
+  "dashboard": {
+    "welcome": "Hello,",
+    "welcomeSuffix": "!",
+    "roleFamily": "Family / Guardian",
+    "roleCaregiver": "Caregiver",
+    "roleSpecialist": "Specialist",
+    "findCaregiver": "Find a Caregiver",
+    "findCaregiverDesc": "Search caregivers in your area",
+    "findSpecialist": "Find Estate Specialist",
+    "comingSoon": "Coming soon",
+    "myProfile": "My Profile",
+    "myProfileDesc": "Manage your license and career info",
+    "bookings": "Bookings",
+    "logout": "Sign Out"
+  }
+}

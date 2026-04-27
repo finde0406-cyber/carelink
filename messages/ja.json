@@ -1,0 +1,112 @@
+{
+  "nav": {
+    "findCaregivers": "介護士を探す",
+    "forCaregivers": "介護士登録",
+    "signIn": "ログイン",
+    "getStarted": "始める"
+  },
+  "hero": {
+    "badge": "早期アクセス受付中",
+    "title1": "ケアを",
+    "title2": "人を",
+    "titleConnect": "つなげます。",
+    "desc": "CareLinkは、ご家族と認定介護士・信頼できる専門家を一つのプラットフォームで世界中につなげます。",
+    "cta1": "無料で始める",
+    "cta2": "介護士を探す",
+    "stat1Num": "1000万人以上",
+    "stat1Label": "世界の介護が必要な高齢者",
+    "stat2Num": "2倍",
+    "stat2Label": "2030年までの介護需要増加",
+    "stat3Num": "1.3兆$",
+    "stat3Label": "グローバルケア市場規模"
+  },
+  "howItWorks": {
+    "tag": "ご利用方法",
+    "title": "シンプル・迅速・安心",
+    "desc": "3ステップで近くの適切なケア専門家とつながれます。",
+    "step1Title": "1. ニーズを登録",
+    "step1Desc": "必要なケアサービスを説明してください。日常サポート、医療支援、専門家相談など何でも対応します。",
+    "step2Title": "2. マッチング",
+    "step2Desc": "資格・経歴・口コミをもとに、近くの認定専門家をマッチングします。",
+    "step3Title": "3. 予約と安全な支払い",
+    "step3Desc": "予約を確定し安全にお支払いください。サービス完了後に代金が支払われます。"
+  },
+  "services": {
+    "tag": "サービス内容",
+    "title": "一つのプラットフォーム、すべてのケア",
+    "desc": "日常的な介護から相続問題まで——CareLinkが全力でサポートします。",
+    "care": {
+      "title": "介護士マッチング",
+      "desc": "資格を持つ介護士をご紹介します。身元確認・口コミ審査済みで、すぐにご利用いただけます。",
+      "tags": ["訪問介護", "医療補助", "認知症ケア", "短期介護"]
+    },
+    "estate": {
+      "title": "相続・法律専門家",
+      "desc": "信頼できる弁護士、税理士、司法書士とつながり、専門的なアドバイスを受けられます。",
+      "tags": ["遺言書作成", "相続税相談", "資産移転", "法律アドバイス"]
+    }
+  },
+  "cta": {
+    "title": "適切なケアを見つける準備はできていますか？",
+    "desc": "すでにCareLinkをご利用中の多くのご家族や介護士に参加しましょう。",
+    "button": "無料で始める"
+  },
+  "footer": {
+    "tagline": "ケアをつなげます、どこでも。",
+    "rights": "© 2025 CareLink. All rights reserved."
+  },
+  "auth": {
+    "login": {
+      "title": "ログイン",
+      "subtitle": "CareLinkへようこそ",
+      "email": "メールアドレス",
+      "password": "パスワード",
+      "submit": "ログイン",
+      "loading": "ログイン中...",
+      "error": "メールアドレスまたはパスワードが正しくありません。",
+      "noAccount": "アカウントをお持ちでない方は",
+      "signup": "新規登録"
+    },
+    "signup": {
+      "title": "アカウント作成",
+      "subtitle": "無料で始める",
+      "roleTitle": "あなたはどちらですか？",
+      "roleSubtitle": "役割を選択してください",
+      "familyLabel": "ご家族/保護者",
+      "familyDesc": "介護士または専門家を探しています",
+      "caregiverLabel": "介護士",
+      "caregiverDesc": "介護サービスを提供したい",
+      "specialistLabel": "専門家",
+      "specialistDesc": "相続・法律・税務の専門家です",
+      "next": "次へ",
+      "back": "← 戻る",
+      "infoTitle": "アカウントを作成",
+      "infoSubtitle": "情報を入力してください",
+      "name": "お名前",
+      "namePlaceholder": "山田太郎",
+      "email": "メールアドレス",
+      "password": "パスワード",
+      "passwordHint": "6文字以上",
+      "submit": "アカウント作成",
+      "loading": "作成中...",
+      "error": "エラーが発生しました。もう一度お試しください。",
+      "hasAccount": "すでにアカウントをお持ちですか？",
+      "login": "ログイン"
+    }
+  },
+  "dashboard": {
+    "welcome": "こんにちは、",
+    "welcomeSuffix": "さん！",
+    "roleFamily": "ご家族/保護者",
+    "roleCaregiver": "介護士",
+    "roleSpecialist": "専門家",
+    "findCaregiver": "介護士を探す",
+    "findCaregiverDesc": "地域別に介護士を検索する",
+    "findSpecialist": "相続専門家を探す",
+    "comingSoon": "準備中です",
+    "myProfile": "プロフィール登録/編集",
+    "myProfileDesc": "資格と経歴を登録する",
+    "bookings": "予約管理",
+    "logout": "ログアウト"
+  }
+}

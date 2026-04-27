@@ -1,0 +1,112 @@
+{
+  "nav": {
+    "findCaregivers": "寻找护理人员",
+    "forCaregivers": "护理人员注册",
+    "signIn": "登录",
+    "getStarted": "开始使用"
+  },
+  "hero": {
+    "badge": "正在接受早期访问申请",
+    "title1": "连接",
+    "title2": "连接",
+    "titleConnect": "人与人。",
+    "desc": "CareLink 将家庭与经过验证的护理人员和可信赖的专家连接起来——全球一个平台，随时随地。",
+    "cta1": "免费开始",
+    "cta2": "寻找护理人员",
+    "stat1Num": "1000万+",
+    "stat1Label": "全球需要护理的老人",
+    "stat2Num": "2倍",
+    "stat2Label": "2030年护理需求增长",
+    "stat3Num": "1.3万亿$",
+    "stat3Label": "全球护理市场规模"
+  },
+  "howItWorks": {
+    "tag": "使用方式",
+    "title": "简单、快速、可信赖",
+    "desc": "三个步骤，连接您附近合适的护理专家。",
+    "step1Title": "1. 发布需求",
+    "step1Desc": "描述您需要的护理服务——日常协助、医疗支持或专家咨询。",
+    "step2Title": "2. 精准匹配",
+    "step2Desc": "根据资质和评价，为您匹配附近经过验证的专业人员。",
+    "step3Title": "3. 预约并安全支付",
+    "step3Desc": "确认预约后安全付款。服务完成后才会释放资金。"
+  },
+  "services": {
+    "tag": "我们的服务",
+    "title": "一个平台，满足所有护理需求",
+    "desc": "从日常护理到遗产事务——CareLink 全程陪伴。",
+    "care": {
+      "title": "护理人员匹配",
+      "desc": "为您的亲人找到持证护理人员。经过背景调查、评价认证，随时准备提供帮助。",
+      "tags": ["居家护理", "医疗协助", "失智症护理", "短期护理"]
+    },
+    "estate": {
+      "title": "遗产与继承专家",
+      "desc": "连接可信赖的律师、税务顾问和遗产规划师，获得专业指导。",
+      "tags": ["遗嘱规划", "税务咨询", "资产转让", "法律建议"]
+    }
+  },
+  "cta": {
+    "title": "准备好找到合适的护理了吗？",
+    "desc": "加入已在 CareLink 上的众多家庭和护理人员。",
+    "button": "免费开始"
+  },
+  "footer": {
+    "tagline": "连接护理，无处不在。",
+    "rights": "© 2025 CareLink. 保留所有权利。"
+  },
+  "auth": {
+    "login": {
+      "title": "登录",
+      "subtitle": "欢迎回到 CareLink",
+      "email": "电子邮件",
+      "password": "密码",
+      "submit": "登录",
+      "loading": "登录中...",
+      "error": "邮箱或密码不正确。",
+      "noAccount": "还没有账号？",
+      "signup": "注册"
+    },
+    "signup": {
+      "title": "创建账号",
+      "subtitle": "免费开始",
+      "roleTitle": "您是？",
+      "roleSubtitle": "请选择您的角色",
+      "familyLabel": "家属/监护人",
+      "familyDesc": "正在寻找护理人员或专家",
+      "caregiverLabel": "护理人员",
+      "caregiverDesc": "我想提供护理服务",
+      "specialistLabel": "专家",
+      "specialistDesc": "我是遗产、法律或税务专家",
+      "next": "下一步",
+      "back": "← 返回",
+      "infoTitle": "创建您的账号",
+      "infoSubtitle": "请输入您的信息",
+      "name": "姓名",
+      "namePlaceholder": "张三",
+      "email": "电子邮件",
+      "password": "密码",
+      "passwordHint": "至少6个字符",
+      "submit": "创建账号",
+      "loading": "创建中...",
+      "error": "发生错误，请重试。",
+      "hasAccount": "已有账号？",
+      "login": "登录"
+    }
+  },
+  "dashboard": {
+    "welcome": "您好，",
+    "welcomeSuffix": "！",
+    "roleFamily": "家属/监护人",
+    "roleCaregiver": "护理人员",
+    "roleSpecialist": "专家",
+    "findCaregiver": "寻找护理人员",
+    "findCaregiverDesc": "搜索您所在地区的护理人员",
+    "findSpecialist": "寻找遗产专家",
+    "comingSoon": "即将推出",
+    "myProfile": "我的资料",
+    "myProfileDesc": "管理您的资质和经历信息",
+    "bookings": "预约管理",
+    "logout": "退出登录"
+  }
+}

@@ -1,38 +1,38 @@
+import createMiddleware from 'next-intl/middleware'
+import { routing } from './i18n/routing'
 import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
 
+const intlMiddleware = createMiddleware(routing)
+
 export async function middleware(request: NextRequest) {
-  let supabaseResponse = NextResponse.next({ request })
+  const response = intlMiddleware(request)
 
-  const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    {
-      cookies: {
-        getAll() { return request.cookies.getAll() },
-        setAll(cookiesToSet) {
-          cookiesToSet.forEach(({ name, value }) => request.cookies.set(name, value))
-          supabaseResponse = NextResponse.next({ request })
-          cookiesToSet.forEach(({ name, value, options }) =>
-            supabaseResponse.cookies.set(name, value, options)
-          )
+  // Supabase auth check for protected routes
+  const pathname = request.nextUrl.pathname
+  const protectedPattern = /^\/(ko|en|zh|ja)\/(dashboard|profile)/
+
+  if (protectedPattern.test(pathname)) {
+    const supabase = createServerClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+      {
+        cookies: {
+          getAll() { return request.cookies.getAll() },
+          setAll() {},
         },
-      },
+      }
+    )
+    const { data: { user } } = await supabase.auth.getUser()
+    const locale = pathname.split('/')[1]
+    if (!user) {
+      return NextResponse.redirect(new URL(`/${locale}/auth/login`, request.url))
     }
-  )
-
-  const { data: { user } } = await supabase.auth.getUser()
-
-  const protectedPaths = ['/dashboard', '/profile']
-  const isProtected = protectedPaths.some(p => request.nextUrl.pathname.startsWith(p))
-
-  if (isProtected && !user) {
-    return NextResponse.redirect(new URL('/auth/login', request.url))
   }
 
-  return supabaseResponse
+  return response
 }
 
 export const config = {
-  matcher: ['/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)'],
+  matcher: ['/((?!_next/static|_next/image|favicon.ico|.*\.(?:svg|png|jpg|jpeg|gif|webp)$).*)'],
 }

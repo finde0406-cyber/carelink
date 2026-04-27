@@ -1,0 +1,112 @@
+{
+  "nav": {
+    "findCaregivers": "요양보호사 찾기",
+    "forCaregivers": "요양보호사 등록",
+    "signIn": "로그인",
+    "getStarted": "시작하기"
+  },
+  "hero": {
+    "badge": "얼리 액세스 신청 받는 중",
+    "title1": "케어를",
+    "title2": "사람을",
+    "titleConnect": "연결합니다.",
+    "desc": "CareLink는 가족과 검증된 요양보호사, 신뢰할 수 있는 전문가를 하나의 플랫폼에서 연결합니다.",
+    "cta1": "무료로 시작하기",
+    "cta2": "요양보호사 찾기",
+    "stat1Num": "1000만+",
+    "stat1Label": "전 세계 돌봄이 필요한 노인",
+    "stat2Num": "2배",
+    "stat2Label": "2030년까지 요양보호사 수요",
+    "stat3Num": "1.3조$",
+    "stat3Label": "글로벌 케어 시장 규모"
+  },
+  "howItWorks": {
+    "tag": "이용 방법",
+    "title": "간단하고 빠르고 안전하게",
+    "desc": "3단계로 근처의 알맞은 케어 전문가를 만나세요.",
+    "step1Title": "1. 요청 등록",
+    "step1Desc": "필요한 돌봄 서비스를 설명하세요. 일상 보조, 의료 지원, 전문가 상담 등 무엇이든 가능합니다.",
+    "step2Title": "2. 매칭",
+    "step2Desc": "자격증, 경력, 후기를 바탕으로 근처의 검증된 전문가를 매칭해드립니다.",
+    "step3Title": "3. 예약 및 안전 결제",
+    "step3Desc": "예약을 확정하고 안전하게 결제하세요. 서비스 완료 후 대금이 지급됩니다."
+  },
+  "services": {
+    "tag": "서비스",
+    "title": "하나의 플랫폼, 모든 돌봄",
+    "desc": "일상 돌봄부터 상속 문제까지 — CareLink가 함께합니다.",
+    "care": {
+      "title": "요양보호사 매칭",
+      "desc": "자격증을 보유한 요양보호사를 찾아드립니다. 신원 확인, 후기 검증 완료.",
+      "tags": ["방문 요양", "의료 보조", "치매 케어", "단기 돌봄"]
+    },
+    "estate": {
+      "title": "상속 · 법률 전문가",
+      "desc": "신뢰할 수 있는 변호사, 세무사, 법무사와 연결됩니다.",
+      "tags": ["유언장 작성", "상속세 상담", "자산 이전", "법률 조언"]
+    }
+  },
+  "cta": {
+    "title": "지금 바로 시작할 준비가 되셨나요?",
+    "desc": "CareLink에서 이미 서비스 중인 수많은 가족과 요양보호사와 함께하세요.",
+    "button": "무료로 시작하기"
+  },
+  "footer": {
+    "tagline": "케어를 연결합니다, 어디서나.",
+    "rights": "© 2025 CareLink. All rights reserved."
+  },
+  "auth": {
+    "login": {
+      "title": "로그인",
+      "subtitle": "로그인하여 서비스를 이용하세요",
+      "email": "이메일",
+      "password": "비밀번호",
+      "submit": "로그인",
+      "loading": "로그인 중...",
+      "error": "이메일 또는 비밀번호가 올바르지 않습니다.",
+      "noAccount": "아직 계정이 없으신가요?",
+      "signup": "회원가입"
+    },
+    "signup": {
+      "title": "회원가입",
+      "subtitle": "무료로 시작하세요",
+      "roleTitle": "어떤 분이세요?",
+      "roleSubtitle": "역할을 선택해주세요",
+      "familyLabel": "가족/보호자",
+      "familyDesc": "요양보호사 또는 전문가를 찾고 있어요",
+      "caregiverLabel": "요양보호사",
+      "caregiverDesc": "돌봄 서비스를 제공하고 싶어요",
+      "specialistLabel": "전문가",
+      "specialistDesc": "상속·법률·세무 전문가예요",
+      "next": "다음",
+      "back": "← 뒤로",
+      "infoTitle": "계정 만들기",
+      "infoSubtitle": "정보를 입력해주세요",
+      "name": "이름",
+      "namePlaceholder": "홍길동",
+      "email": "이메일",
+      "password": "비밀번호",
+      "passwordHint": "6자 이상",
+      "submit": "회원가입",
+      "loading": "가입 중...",
+      "error": "회원가입 중 오류가 발생했습니다.",
+      "hasAccount": "이미 계정이 있으신가요?",
+      "login": "로그인"
+    }
+  },
+  "dashboard": {
+    "welcome": "안녕하세요,",
+    "welcomeSuffix": "님!",
+    "roleFamily": "가족/보호자",
+    "roleCaregiver": "요양보호사",
+    "roleSpecialist": "전문가",
+    "findCaregiver": "요양보호사 찾기",
+    "findCaregiverDesc": "지역별 요양보호사를 검색하세요",
+    "findSpecialist": "상속 전문가 찾기",
+    "comingSoon": "준비 중입니다",
+    "myProfile": "프로필 등록/수정",
+    "myProfileDesc": "나의 자격증과 경력을 등록하세요",
+    "bookings": "예약 관리",
+    "logout": "로그아웃"
+  }
+}
