@@ -97,16 +97,7 @@ export default function CaregiverDetailPage() {
 
   useEffect(() => {
     async function load() {
-      const { data: { user } } = await supabase.auth.getUser()
-      if (!user) { router.push(`/${locale}/auth/login`); return }
-      setCurrentUserId(user.id)
-
-      const { data: profileData } = await supabase
-        .from('profiles')
-        .select('role')
-        .eq('id', user.id)
-        .single()
-
+      // 프로필 데이터는 비로그인도 조회 가능
       const { data } = await supabase
         .from('caregiver_profiles')
         .select('*, profiles(full_name, avatar_url), caregiver_availability(day_of_week, time_slot)')
@@ -117,21 +108,33 @@ export default function CaregiverDetailPage() {
 
       const reviewData = await loadReviews()
       setReviews(reviewData)
-      setHasReviewed(reviewData.some(r => r.reviewer_id === user.id))
 
-      const eligible = profileData?.role === 'family' && data?.user_id !== user.id
-      setCanReview(!!eligible)
-      setCanBook(profileData?.role === 'family')
+      // 로그인 상태면 추가 기능 활성화
+      const { data: { user } } = await supabase.auth.getUser()
+      if (user) {
+        setCurrentUserId(user.id)
 
-      // 즐겨찾기 여부 확인
-      const { data: favData } = await supabase
-        .from('favorites')
-        .select('id')
-        .eq('user_id', user.id)
-        .eq('caregiver_id', id)
-        .maybeSingle()
-      setIsFavorite(!!favData)
-      if (favData) setFavoriteId(favData.id)
+        const { data: profileData } = await supabase
+          .from('profiles')
+          .select('role')
+          .eq('id', user.id)
+          .single()
+
+        setHasReviewed(reviewData.some(r => r.reviewer_id === user.id))
+
+        const eligible = profileData?.role === 'family' && data?.user_id !== user.id
+        setCanReview(!!eligible)
+        setCanBook(profileData?.role === 'family')
+
+        const { data: favData } = await supabase
+          .from('favorites')
+          .select('id')
+          .eq('user_id', user.id)
+          .eq('caregiver_id', id)
+          .maybeSingle()
+        setIsFavorite(!!favData)
+        if (favData) setFavoriteId(favData.id)
+      }
 
       setLoading(false)
     }

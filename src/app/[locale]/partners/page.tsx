@@ -18,13 +18,35 @@ export default function PartnersPage() {
 
   return (
     <div className="min-h-screen bg-white">
+      {/* Top nav bar */}
+      <nav className="fixed top-0 left-0 right-0 z-50 bg-white/90 backdrop-blur border-b border-gray-100">
+        <div className="max-w-5xl mx-auto px-4 h-16 flex items-center justify-between">
+          <Link href={`/${locale}`} className="text-2xl font-extrabold tracking-tight text-emerald-700">
+            Care<span className="text-amber-400">Link</span>
+          </Link>
+          <div className="flex items-center gap-4 text-sm font-medium">
+            <Link href={`/${locale}/search`} className="text-gray-600 hover:text-emerald-700 transition hidden sm:block">
+              전문가 찾기
+            </Link>
+            <Link href={`/${locale}/auth/login`} className="text-gray-600 hover:text-emerald-700 transition">
+              로그인
+            </Link>
+            <Link
+              href={`/${locale}/auth/signup`}
+              className="bg-emerald-700 text-white px-5 py-2 rounded-full hover:bg-emerald-800 transition">
+              무료 가입
+            </Link>
+          </div>
+        </div>
+      </nav>
+
       {/* Hero */}
       <section className="relative bg-gradient-to-br from-emerald-700 via-emerald-600 to-teal-500 text-white overflow-hidden">
         <div className="absolute inset-0 opacity-10">
           <div className="absolute top-10 left-10 w-64 h-64 rounded-full bg-white blur-3xl" />
           <div className="absolute bottom-0 right-0 w-96 h-96 rounded-full bg-amber-300 blur-3xl" />
         </div>
-        <div className="relative max-w-5xl mx-auto px-4 pt-28 pb-20 text-center">
+        <div className="relative max-w-5xl mx-auto px-4 pt-36 pb-20 text-center">
           <div className="inline-flex items-center gap-2 bg-white/20 backdrop-blur px-4 py-1.5 rounded-full text-sm font-medium mb-6">
             <span className="w-2 h-2 bg-amber-300 rounded-full animate-pulse" />
             무료로 시작하세요
