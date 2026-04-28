@@ -21,6 +21,7 @@ export default function SignupPage() {
   const [password, setPassword] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
+  const [agreedToTerms, setAgreedToTerms] = useState(false)
 
   const roles: { value: Role; label: string; desc: string; icon: string }[] = [
     { value: 'family', label: t('familyLabel'), desc: t('familyDesc'), icon: '👨‍👩‍👧' },
@@ -176,11 +177,27 @@ export default function SignupPage() {
                   />
                 </div>
 
+                {/* 약관 동의 */}
+                <label className="flex items-start gap-3 cursor-pointer mt-1">
+                  <input
+                    type="checkbox"
+                    checked={agreedToTerms}
+                    onChange={e => setAgreedToTerms(e.target.checked)}
+                    className="mt-0.5 w-4 h-4 accent-emerald-700 shrink-0"
+                  />
+                  <span className="text-xs text-gray-500 leading-relaxed">
+                    <a href={`/${locale}/terms`} target="_blank" className="text-emerald-700 font-semibold hover:underline">이용약관</a>
+                    {' '}및{' '}
+                    <a href={`/${locale}/privacy`} target="_blank" className="text-emerald-700 font-semibold hover:underline">개인정보처리방침</a>
+                    에 동의합니다. (필수)
+                  </span>
+                </label>
+
                 <button
                   type="submit"
-                  disabled={loading}
+                  disabled={loading || !agreedToTerms}
                   className="w-full bg-emerald-700 text-white py-3 rounded-xl font-semibold text-sm
-                    hover:bg-emerald-800 transition disabled:opacity-60 disabled:cursor-not-allowed mt-2">
+                    hover:bg-emerald-800 transition disabled:opacity-40 disabled:cursor-not-allowed mt-2">
                   {loading ? t('loading') : t('submit')}
                 </button>
               </form>

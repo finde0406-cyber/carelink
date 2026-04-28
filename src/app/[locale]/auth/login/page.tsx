@@ -27,7 +27,7 @@ export default function LoginPage() {
       setError('인증 링크가 만료됐거나 유효하지 않습니다. 다시 회원가입하거나 고객센터에 문의해주세요.')
     }
     if (messageParam === 'email_sent') {
-      setNotice('가입 완료! 이메일 받은 편지함을 확인하고 인증 링크를 클릭해주세요.')
+      setNotice('📧 가입 완료! 이메일 받은 편지함을 확인하고 인증 링크를 클릭하면 로그인할 수 있습니다. 스팸 폴더도 확인해주세요.')
     }
   }, [searchParams])
 

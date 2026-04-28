@@ -133,9 +133,14 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
       </section>
 
       {/* FOOTER */}
-      <footer className="bg-gray-900 text-gray-400 text-center py-8 text-sm">
-        <p><span className="text-white font-bold">CareLink</span> · {f('tagline')}</p>
-        <p className="mt-2">{f('rights')}</p>
+      <footer className="bg-gray-900 text-gray-400 text-center py-10 text-sm">
+        <p className="mb-3"><span className="text-white font-bold">CareLink</span> · {f('tagline')}</p>
+        <div className="flex justify-center gap-6 mb-4 text-gray-500">
+          <Link href={`/${locale}/terms`} className="hover:text-gray-300 transition">이용약관</Link>
+          <Link href={`/${locale}/privacy`} className="hover:text-gray-300 transition">개인정보처리방침</Link>
+          <Link href={`/${locale}/partners`} className="hover:text-gray-300 transition">파트너 등록</Link>
+        </div>
+        <p>{f('rights')}</p>
       </footer>
     </>
   )

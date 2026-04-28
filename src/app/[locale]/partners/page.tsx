@@ -252,6 +252,17 @@ export default function PartnersPage() {
           </Link>
         </div>
       </section>
+
+      {/* Footer */}
+      <footer className="bg-gray-900 text-gray-500 text-center py-8 text-sm">
+        <p className="mb-3 text-white font-bold">CareLink</p>
+        <div className="flex justify-center gap-6 mb-3">
+          <Link href={`/${locale}/terms`} className="hover:text-gray-300 transition">이용약관</Link>
+          <Link href={`/${locale}/privacy`} className="hover:text-gray-300 transition">개인정보처리방침</Link>
+          <Link href={`/${locale}`} className="hover:text-gray-300 transition">홈</Link>
+        </div>
+        <p>© 2025 CareLink. All rights reserved.</p>
+      </footer>
     </div>
   )
 }
