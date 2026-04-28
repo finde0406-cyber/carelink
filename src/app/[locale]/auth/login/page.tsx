@@ -1,8 +1,8 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { useTranslations, useLocale } from 'next-intl'
 import { createClient } from '@/lib/supabase/client'
 
@@ -10,17 +10,32 @@ export default function LoginPage() {
   const t = useTranslations('auth.login')
   const locale = useLocale()
   const router = useRouter()
+  const searchParams = useSearchParams()
   const supabase = createClient()
 
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
+  const [notice, setNotice] = useState('')
+
+  useEffect(() => {
+    const errorParam = searchParams.get('error')
+    const messageParam = searchParams.get('message')
+
+    if (errorParam === 'link_expired') {
+      setError('인증 링크가 만료됐거나 유효하지 않습니다. 다시 회원가입하거나 고객센터에 문의해주세요.')
+    }
+    if (messageParam === 'email_sent') {
+      setNotice('가입 완료! 이메일 받은 편지함을 확인하고 인증 링크를 클릭해주세요.')
+    }
+  }, [searchParams])
 
   async function handleLogin(e: React.FormEvent) {
     e.preventDefault()
     setLoading(true)
     setError('')
+    setNotice('')
 
     const { error } = await supabase.auth.signInWithPassword({ email, password })
 
@@ -47,6 +62,12 @@ export default function LoginPage() {
 
         <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8">
           <h1 className="text-xl font-bold text-gray-900 mb-6">{t('title')}</h1>
+
+          {notice && (
+            <div className="bg-emerald-50 text-emerald-700 rounded-xl px-4 py-3 text-sm mb-4 border border-emerald-100">
+              {notice}
+            </div>
+          )}
 
           {error && (
             <div className="bg-red-50 text-red-600 rounded-xl px-4 py-3 text-sm mb-4">

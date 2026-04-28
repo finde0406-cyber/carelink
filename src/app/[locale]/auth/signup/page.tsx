@@ -34,7 +34,7 @@ export default function SignupPage() {
     setLoading(true)
     setError('')
 
-    const { error } = await supabase.auth.signUp({
+    const { data, error } = await supabase.auth.signUp({
       email,
       password,
       options: {
@@ -49,7 +49,14 @@ export default function SignupPage() {
       return
     }
 
-    router.push(`/${locale}/auth/login?verified=1`)
+    // 이미 가입된 이메일: Supabase가 오류 대신 identities: [] 로 응답
+    if (data.user && data.user.identities?.length === 0) {
+      setError('이미 사용 중인 이메일입니다. 해당 이메일로 로그인해주세요.')
+      setLoading(false)
+      return
+    }
+
+    router.push(`/${locale}/auth/login?message=email_sent`)
   }
 
   return (

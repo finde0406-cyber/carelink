@@ -1,5 +1,4 @@
 import Link from 'next/link'
-import { useTranslations } from 'next-intl'
 import { getTranslations } from 'next-intl/server'
 import Navbar from '@/components/layout/Navbar'
 
@@ -9,12 +8,16 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
   return { title: `CareLink — ${t('badge')}` }
 }
 
-export default function HomePage() {
-  const t = useTranslations('hero')
-  const h = useTranslations('howItWorks')
-  const s = useTranslations('services')
-  const c = useTranslations('cta')
-  const f = useTranslations('footer')
+export default async function HomePage({ params }: { params: Promise<{ locale: string }> }) {
+  const { locale } = await params
+  const t = await getTranslations({ locale, namespace: 'hero' })
+  const h = await getTranslations({ locale, namespace: 'howItWorks' })
+  const s = await getTranslations({ locale, namespace: 'services' })
+  const c = await getTranslations({ locale, namespace: 'cta' })
+  const f = await getTranslations({ locale, namespace: 'footer' })
+
+  const careTags = s.raw('care.tags') as string[]
+  const estateTags = s.raw('estate.tags') as string[]
 
   return (
     <>
@@ -37,12 +40,12 @@ export default function HomePage() {
         <p className="text-lg text-gray-500 max-w-xl mb-10">{t('desc')}</p>
 
         <div className="flex flex-col sm:flex-row gap-3">
-          <Link href="auth/signup"
+          <Link href={`/${locale}/auth/signup`}
             className="bg-emerald-700 text-white px-8 py-3.5 rounded-full font-semibold text-base
               hover:bg-emerald-800 transition">
             {t('cta1')}
           </Link>
-          <Link href="search"
+          <Link href={`/${locale}/search`}
             className="border border-gray-200 text-gray-700 px-8 py-3.5 rounded-full font-semibold text-base
               hover:bg-gray-50 transition">
             {t('cta2')}
@@ -54,10 +57,10 @@ export default function HomePage() {
             { num: t('stat1Num'), label: t('stat1Label') },
             { num: t('stat2Num'), label: t('stat2Label') },
             { num: t('stat3Num'), label: t('stat3Label') },
-          ].map((s) => (
-            <div key={s.label}>
-              <div className="text-3xl font-extrabold text-emerald-700">{s.num}</div>
-              <div className="text-sm text-gray-500 mt-1">{s.label}</div>
+          ].map((item) => (
+            <div key={item.label}>
+              <div className="text-3xl font-extrabold text-emerald-700">{item.num}</div>
+              <div className="text-sm text-gray-500 mt-1">{item.label}</div>
             </div>
           ))}
         </div>
@@ -98,7 +101,7 @@ export default function HomePage() {
               <h3 className="text-xl font-bold mb-3">{s('care.title')}</h3>
               <p className="opacity-80 text-sm mb-6">{s('care.desc')}</p>
               <div className="flex flex-wrap gap-2">
-                {(s.raw('care.tags') as string[]).map((tag: string) => (
+                {careTags.map((tag) => (
                   <span key={tag} className="bg-white/20 rounded-full px-3 py-1 text-xs font-medium">{tag}</span>
                 ))}
               </div>
@@ -109,7 +112,7 @@ export default function HomePage() {
               <h3 className="text-xl font-bold mb-3">{s('estate.title')}</h3>
               <p className="opacity-80 text-sm mb-6">{s('estate.desc')}</p>
               <div className="flex flex-wrap gap-2">
-                {(s.raw('estate.tags') as string[]).map((tag: string) => (
+                {estateTags.map((tag) => (
                   <span key={tag} className="bg-white/20 rounded-full px-3 py-1 text-xs font-medium">{tag}</span>
                 ))}
               </div>
@@ -122,7 +125,7 @@ export default function HomePage() {
       <section className="bg-emerald-800 text-white text-center py-24 px-4">
         <h2 className="text-4xl font-extrabold tracking-tight mb-4">{c('title')}</h2>
         <p className="text-emerald-200 mb-8 max-w-md mx-auto">{c('desc')}</p>
-        <Link href="auth/signup"
+        <Link href={`/${locale}/auth/signup`}
           className="bg-amber-400 text-white px-10 py-4 rounded-full font-bold text-lg
             hover:bg-amber-500 transition inline-block">
           {c('button')}

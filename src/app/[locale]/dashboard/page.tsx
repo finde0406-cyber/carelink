@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { useTranslations, useLocale } from 'next-intl'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import Link from 'next/link'
 
@@ -10,12 +10,21 @@ export default function DashboardPage() {
   const t = useTranslations('dashboard')
   const locale = useLocale()
   const router = useRouter()
+  const searchParams = useSearchParams()
   const supabase = createClient()
 
   const [profile, setProfile] = useState<{ full_name: string; role: string } | null>(null)
   const [loading, setLoading] = useState(true)
   const [showDeleteModal, setShowDeleteModal] = useState(false)
   const [deleting, setDeleting] = useState(false)
+  const [showVerifiedBanner, setShowVerifiedBanner] = useState(false)
+
+  useEffect(() => {
+    if (searchParams.get('verified') === 'true') {
+      setShowVerifiedBanner(true)
+      setTimeout(() => setShowVerifiedBanner(false), 6000)
+    }
+  }, [searchParams])
 
   useEffect(() => {
     async function load() {
@@ -75,6 +84,12 @@ export default function DashboardPage() {
           </button>
         </div>
       </header>
+
+      {showVerifiedBanner && (
+        <div className="bg-emerald-600 text-white text-center text-sm font-medium py-3 px-4">
+          ✅ 이메일 인증이 완료됐습니다! CareLink에 오신 걸 환영해요.
+        </div>
+      )}
 
       <main className="max-w-4xl mx-auto px-4 py-10">
         <div className="bg-emerald-700 text-white rounded-2xl p-8 mb-8">
