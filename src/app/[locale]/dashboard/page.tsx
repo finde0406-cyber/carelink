@@ -14,6 +14,8 @@ export default function DashboardPage() {
 
   const [profile, setProfile] = useState<{ full_name: string; role: string } | null>(null)
   const [loading, setLoading] = useState(true)
+  const [showDeleteModal, setShowDeleteModal] = useState(false)
+  const [deleting, setDeleting] = useState(false)
 
   useEffect(() => {
     async function load() {
@@ -35,6 +37,19 @@ export default function DashboardPage() {
   async function handleLogout() {
     await supabase.auth.signOut()
     router.push(`/${locale}`)
+  }
+
+  async function handleDeleteAccount() {
+    setDeleting(true)
+    const res = await fetch('/api/delete-account', { method: 'DELETE' })
+    if (res.ok) {
+      await supabase.auth.signOut()
+      router.push(`/${locale}`)
+    } else {
+      setDeleting(false)
+      setShowDeleteModal(false)
+      alert('탈퇴 처리 중 오류가 발생했습니다.')
+    }
   }
 
   if (loading) return (
@@ -111,7 +126,49 @@ export default function DashboardPage() {
             </div>
           )}
         </div>
+
+        {/* 회원 탈퇴 */}
+        <div className="mt-12 pt-8 border-t border-gray-200 text-center">
+          <button
+            onClick={() => setShowDeleteModal(true)}
+            className="text-xs text-gray-400 hover:text-red-500 transition underline underline-offset-2">
+            회원 탈퇴
+          </button>
+        </div>
       </main>
+
+      {/* 탈퇴 확인 모달 */}
+      {showDeleteModal && (
+        <div
+          className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 px-4"
+          onClick={() => !deleting && setShowDeleteModal(false)}>
+          <div
+            className="bg-white rounded-2xl p-8 w-full max-w-sm shadow-xl"
+            onClick={e => e.stopPropagation()}>
+            <div className="text-4xl mb-4 text-center">⚠️</div>
+            <h3 className="text-lg font-bold text-gray-900 mb-2 text-center">정말 탈퇴하시겠습니까?</h3>
+            <p className="text-sm text-gray-500 text-center leading-relaxed mb-6">
+              계정과 모든 데이터가 영구적으로 삭제됩니다.<br />이 작업은 되돌릴 수 없습니다.
+            </p>
+            <div className="flex gap-3">
+              <button
+                onClick={() => setShowDeleteModal(false)}
+                disabled={deleting}
+                className="flex-1 border border-gray-200 text-gray-700 py-3 rounded-xl text-sm font-semibold
+                  hover:bg-gray-50 transition disabled:opacity-50">
+                취소
+              </button>
+              <button
+                onClick={handleDeleteAccount}
+                disabled={deleting}
+                className="flex-1 bg-red-500 text-white py-3 rounded-xl text-sm font-semibold
+                  hover:bg-red-600 transition disabled:opacity-50">
+                {deleting ? '처리 중...' : '탈퇴하기'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
