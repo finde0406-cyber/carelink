@@ -209,9 +209,15 @@ export default function SearchPage() {
           <Link href={`/${locale}`} className="text-xl font-extrabold text-emerald-700">
             Care<span className="text-amber-400">Link</span>
           </Link>
-          <Link href={`/${locale}/dashboard`} className="text-sm text-gray-500 hover:text-gray-700">
-            {t('backToDashboard')}
-          </Link>
+          {currentUserId ? (
+            <Link href={`/${locale}/dashboard`} className="text-sm text-gray-500 hover:text-gray-700">
+              {t('backToDashboard')}
+            </Link>
+          ) : (
+            <Link href={`/${locale}`} className="text-sm text-gray-500 hover:text-gray-700">
+              ← 홈
+            </Link>
+          )}
         </div>
       </header>
 

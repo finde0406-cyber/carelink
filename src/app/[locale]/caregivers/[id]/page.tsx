@@ -142,7 +142,8 @@ export default function CaregiverDetailPage() {
   }, [id])
 
   async function toggleFavorite() {
-    if (!currentUserId || favLoading) return
+    if (!currentUserId) { router.push(`/${locale}/auth/login`); return }
+    if (favLoading) return
     setFavLoading(true)
     if (isFavorite && favoriteId) {
       await supabase.from('favorites').delete().eq('id', favoriteId)
@@ -327,14 +328,25 @@ export default function CaregiverDetailPage() {
             </div>
           </div>
 
-          {/* 상담 예약 버튼 */}
-          {canBook && (
+          {/* 상담 예약 버튼 — 항상 표시, 상태별 분기 */}
+          {!currentUserId ? (
+            <button
+              onClick={() => router.push(`/${locale}/auth/login`)}
+              className="w-full mt-6 bg-emerald-700 text-white py-3.5 rounded-xl font-semibold
+                hover:bg-emerald-800 transition text-sm">
+              {t('consultBtn')}
+            </button>
+          ) : canBook ? (
             <button
               onClick={() => setShowConsultModal(true)}
               className="w-full mt-6 bg-emerald-700 text-white py-3.5 rounded-xl font-semibold
                 hover:bg-emerald-800 transition text-sm">
               {t('consultBtn')}
             </button>
+          ) : (
+            <div className="mt-6 w-full text-center text-sm text-gray-400 py-3 bg-gray-50 rounded-xl border border-gray-100">
+              가족 계정으로만 상담 예약이 가능합니다
+            </div>
           )}
         </div>
 
@@ -377,6 +389,19 @@ export default function CaregiverDetailPage() {
             <span className="text-sm text-gray-400">{reviewCount}개</span>
           </div>
 
+          {/* 비로그인: 로그인 유도 */}
+          {!currentUserId && (
+            <button
+              onClick={() => router.push(`/${locale}/auth/login`)}
+              className="mb-6 w-full text-left p-4 bg-gray-50 rounded-xl border border-dashed border-gray-200
+                hover:border-emerald-400 hover:bg-emerald-50 transition group">
+              <span className="text-sm text-gray-400 group-hover:text-emerald-600">
+                ✍️ 로그인하면 리뷰를 작성할 수 있어요 →
+              </span>
+            </button>
+          )}
+
+          {/* 로그인 + 가족 + 미작성 */}
           {canReview && !hasReviewed && (
             <form onSubmit={handleSubmitReview}
               className="mb-6 p-5 bg-gray-50 rounded-2xl border border-gray-200">
