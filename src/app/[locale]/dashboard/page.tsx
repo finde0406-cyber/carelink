@@ -5,6 +5,7 @@ import { useTranslations, useLocale } from 'next-intl'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import Link from 'next/link'
+import NotificationBell from '@/components/layout/NotificationBell'
 
 export default function DashboardPage() {
   const t = useTranslations('dashboard')
@@ -77,11 +78,14 @@ export default function DashboardPage() {
           <Link href={`/${locale}`} className="text-xl font-extrabold text-emerald-700">
             Care<span className="text-amber-400">Link</span>
           </Link>
-          <button
-            onClick={handleLogout}
-            className="text-sm text-gray-500 hover:text-gray-700">
-            {t('logout')}
-          </button>
+          <div className="flex items-center gap-2">
+            <NotificationBell />
+            <button
+              onClick={handleLogout}
+              className="text-sm text-gray-500 hover:text-gray-700">
+              {t('logout')}
+            </button>
+          </div>
         </div>
       </header>
 
@@ -109,6 +113,18 @@ export default function DashboardPage() {
                 <h3 className="font-bold text-gray-900 mb-1">{t('findCaregiver')}</h3>
                 <p className="text-sm text-gray-500">{t('findCaregiverDesc')}</p>
               </Link>
+              <Link href={`/${locale}/favorites`}
+                className="bg-white border border-gray-200 rounded-2xl p-6 hover:shadow-md transition hover:-translate-y-0.5">
+                <div className="text-3xl mb-3">♥</div>
+                <h3 className="font-bold text-gray-900 mb-1">{t('favorites')}</h3>
+                <p className="text-sm text-gray-500">{t('favoritesDesc')}</p>
+              </Link>
+              <Link href={`/${locale}/consultations`}
+                className="bg-white border border-gray-200 rounded-2xl p-6 hover:shadow-md transition hover:-translate-y-0.5">
+                <div className="text-3xl mb-3">📋</div>
+                <h3 className="font-bold text-gray-900 mb-1">{t('myConsultations')}</h3>
+                <p className="text-sm text-gray-500">{t('myConsultationsDesc')}</p>
+              </Link>
               <div className="bg-white border border-gray-200 rounded-2xl p-6 opacity-60">
                 <div className="text-3xl mb-3">📜</div>
                 <h3 className="font-bold text-gray-900 mb-1">{t('findSpecialist')}</h3>
@@ -125,11 +141,12 @@ export default function DashboardPage() {
                 <h3 className="font-bold text-gray-900 mb-1">{t('myProfile')}</h3>
                 <p className="text-sm text-gray-500">{t('myProfileDesc')}</p>
               </Link>
-              <div className="bg-white border border-gray-200 rounded-2xl p-6 opacity-60">
+              <Link href={`/${locale}/consultations`}
+                className="bg-white border border-gray-200 rounded-2xl p-6 hover:shadow-md transition hover:-translate-y-0.5">
                 <div className="text-3xl mb-3">📅</div>
-                <h3 className="font-bold text-gray-900 mb-1">{t('bookings')}</h3>
-                <p className="text-sm text-gray-500">{t('comingSoon')}</p>
-              </div>
+                <h3 className="font-bold text-gray-900 mb-1">{t('incomingRequests')}</h3>
+                <p className="text-sm text-gray-500">{t('incomingRequestsDesc')}</p>
+              </Link>
             </>
           )}
 
@@ -142,7 +159,6 @@ export default function DashboardPage() {
           )}
         </div>
 
-        {/* 회원 탈퇴 */}
         <div className="mt-12 pt-8 border-t border-gray-200 text-center">
           <button
             onClick={() => setShowDeleteModal(true)}
@@ -152,7 +168,6 @@ export default function DashboardPage() {
         </div>
       </main>
 
-      {/* 탈퇴 확인 모달 */}
       {showDeleteModal && (
         <div
           className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 px-4"
@@ -169,8 +184,8 @@ export default function DashboardPage() {
               <button
                 onClick={() => setShowDeleteModal(false)}
                 disabled={deleting}
-                className="flex-1 border border-gray-200 text-gray-700 py-3 rounded-xl text-sm font-semibold
-                  hover:bg-gray-50 transition disabled:opacity-50">
+                className="flex-1 border border-gray-200 text-gray-700 py-3 rounded-xl text-sm
+                  font-semibold hover:bg-gray-50 transition disabled:opacity-50">
                 취소
               </button>
               <button

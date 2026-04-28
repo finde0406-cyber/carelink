@@ -33,6 +33,11 @@ interface Review {
   profiles: { full_name: string } | null
 }
 
+const TIME_SLOTS = [
+  '오전 9:00', '오전 10:00', '오전 11:00',
+  '오후 1:00', '오후 2:00', '오후 3:00', '오후 4:00', '오후 5:00',
+]
+
 function StarRow({ rating, size = 'sm' }: { rating: number; size?: 'sm' | 'lg' }) {
   const cls = size === 'lg' ? 'text-2xl' : 'text-base'
   return (
@@ -46,6 +51,7 @@ function StarRow({ rating, size = 'sm' }: { rating: number; size?: 'sm' | 'lg' }
 
 export default function CaregiverDetailPage() {
   const t = useTranslations('caregiverDetail')
+  const tC = useTranslations('consultation')
   const locale = useLocale()
   const router = useRouter()
   const params = useParams()
@@ -54,16 +60,31 @@ export default function CaregiverDetailPage() {
 
   const [caregiver, setCaregiver] = useState<CaregiverDetail | null>(null)
   const [loading, setLoading] = useState(true)
-  const [showContactModal, setShowContactModal] = useState(false)
 
   const [currentUserId, setCurrentUserId] = useState<string | null>(null)
   const [canReview, setCanReview] = useState(false)
+  const [canBook, setCanBook] = useState(false)
   const [reviews, setReviews] = useState<Review[]>([])
   const [hasReviewed, setHasReviewed] = useState(false)
   const [reviewRating, setReviewRating] = useState(0)
   const [reviewComment, setReviewComment] = useState('')
   const [reviewSubmitting, setReviewSubmitting] = useState(false)
   const [reviewMessage, setReviewMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null)
+
+  // 즐겨찾기
+  const [isFavorite, setIsFavorite] = useState(false)
+  const [favoriteId, setFavoriteId] = useState<string | null>(null)
+  const [favLoading, setFavLoading] = useState(false)
+
+  // 상담 예약 모달
+  const [showConsultModal, setShowConsultModal] = useState(false)
+  const [consultDate, setConsultDate] = useState('')
+  const [consultTime, setConsultTime] = useState('')
+  const [consultNotes, setConsultNotes] = useState('')
+  const [consultSubmitting, setConsultSubmitting] = useState(false)
+  const [consultMessage, setConsultMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null)
+
+  const today = new Date().toISOString().split('T')[0]
 
   async function loadReviews() {
     const { data } = await supabase
@@ -96,17 +117,45 @@ export default function CaregiverDetailPage() {
 
       const reviewData = await loadReviews()
       setReviews(reviewData)
-
-      const alreadyReviewed = reviewData.some(r => r.reviewer_id === user.id)
-      setHasReviewed(alreadyReviewed)
+      setHasReviewed(reviewData.some(r => r.reviewer_id === user.id))
 
       const eligible = profileData?.role === 'family' && data?.user_id !== user.id
       setCanReview(!!eligible)
+      setCanBook(profileData?.role === 'family')
+
+      // 즐겨찾기 여부 확인
+      const { data: favData } = await supabase
+        .from('favorites')
+        .select('id')
+        .eq('user_id', user.id)
+        .eq('caregiver_id', id)
+        .maybeSingle()
+      setIsFavorite(!!favData)
+      if (favData) setFavoriteId(favData.id)
 
       setLoading(false)
     }
     load()
   }, [id])
+
+  async function toggleFavorite() {
+    if (!currentUserId || favLoading) return
+    setFavLoading(true)
+    if (isFavorite && favoriteId) {
+      await supabase.from('favorites').delete().eq('id', favoriteId)
+      setIsFavorite(false)
+      setFavoriteId(null)
+    } else {
+      const { data } = await supabase
+        .from('favorites')
+        .insert({ user_id: currentUserId, caregiver_id: id })
+        .select('id')
+        .single()
+      setIsFavorite(true)
+      if (data) setFavoriteId(data.id)
+    }
+    setFavLoading(false)
+  }
 
   async function handleSubmitReview(e: React.FormEvent) {
     e.preventDefault()
@@ -129,9 +178,37 @@ export default function CaregiverDetailPage() {
 
     setReviewMessage({ type: 'success', text: t('reviewSuccess') })
     setHasReviewed(true)
-    const refreshed = await loadReviews()
-    setReviews(refreshed)
+    setReviews(await loadReviews())
     setReviewSubmitting(false)
+  }
+
+  async function handleConsultSubmit(e: React.FormEvent) {
+    e.preventDefault()
+    if (!consultDate || !consultTime || !currentUserId) return
+    setConsultSubmitting(true)
+    setConsultMessage(null)
+
+    const { error } = await supabase.from('consultations').insert({
+      family_id: currentUserId,
+      caregiver_id: id,
+      requested_date: consultDate,
+      requested_time: consultTime,
+      notes: consultNotes.trim() || null,
+    })
+
+    if (error) {
+      setConsultMessage({ type: 'error', text: tC('errorMsg') })
+    } else {
+      setConsultMessage({ type: 'success', text: tC('successMsg') })
+      setTimeout(() => {
+        setShowConsultModal(false)
+        setConsultDate('')
+        setConsultTime('')
+        setConsultNotes('')
+        setConsultMessage(null)
+      }, 1500)
+    }
+    setConsultSubmitting(false)
   }
 
   if (loading) return (
@@ -174,7 +251,6 @@ export default function CaregiverDetailPage() {
         {/* Hero card */}
         <div className="bg-white border border-gray-200 rounded-2xl p-8">
           <div className="flex items-start gap-6">
-            {/* Avatar */}
             <div className="shrink-0">
               {caregiver.profiles?.avatar_url ? (
                 <img
@@ -196,15 +272,29 @@ export default function CaregiverDetailPage() {
                   <p className="text-emerald-700 font-semibold mt-0.5">{caregiver.license_type}</p>
                   <p className="text-sm text-gray-500 mt-1">📍 {caregiver.region}</p>
                 </div>
-                <span className={`shrink-0 text-xs font-bold px-3 py-1.5 rounded-full
-                  ${caregiver.available
-                    ? 'bg-emerald-100 text-emerald-700'
-                    : 'bg-gray-100 text-gray-500'}`}>
-                  {caregiver.available ? t('available') : t('unavailable')}
-                </span>
+                <div className="flex items-center gap-2 shrink-0">
+                  {/* 즐겨찾기 버튼 */}
+                  <button
+                    onClick={toggleFavorite}
+                    disabled={favLoading}
+                    title={isFavorite ? t('favoriteRemove') : t('favoriteAdd')}
+                    className={`w-10 h-10 rounded-full border flex items-center justify-center text-lg
+                      transition disabled:opacity-50
+                      ${isFavorite
+                        ? 'border-red-300 bg-red-50 text-red-500'
+                        : 'border-gray-200 hover:border-red-300 hover:bg-red-50 text-gray-400 hover:text-red-400'
+                      }`}>
+                    {isFavorite ? '♥' : '♡'}
+                  </button>
+                  <span className={`text-xs font-bold px-3 py-1.5 rounded-full
+                    ${caregiver.available
+                      ? 'bg-emerald-100 text-emerald-700'
+                      : 'bg-gray-100 text-gray-500'}`}>
+                    {caregiver.available ? t('available') : t('unavailable')}
+                  </span>
+                </div>
               </div>
 
-              {/* Stats row */}
               <div className="flex flex-wrap gap-4 mt-4">
                 <div className="text-center">
                   <div className="text-xl font-extrabold text-gray-900">{caregiver.experience_years}</div>
@@ -234,13 +324,15 @@ export default function CaregiverDetailPage() {
             </div>
           </div>
 
-          {/* Contact button */}
-          <button
-            onClick={() => setShowContactModal(true)}
-            className="w-full mt-6 bg-emerald-700 text-white py-3.5 rounded-xl font-semibold
-              hover:bg-emerald-800 transition text-sm">
-            {t('contact')}
-          </button>
+          {/* 상담 예약 버튼 */}
+          {canBook && (
+            <button
+              onClick={() => setShowConsultModal(true)}
+              className="w-full mt-6 bg-emerald-700 text-white py-3.5 rounded-xl font-semibold
+                hover:bg-emerald-800 transition text-sm">
+              {t('consultBtn')}
+            </button>
+          )}
         </div>
 
         {/* Bio */}
@@ -248,7 +340,6 @@ export default function CaregiverDetailPage() {
           <h2 className="text-base font-bold text-gray-900 mb-4">{t('bioTitle')}</h2>
           <p className="text-sm text-gray-600 leading-relaxed whitespace-pre-wrap">{caregiver.bio}</p>
 
-          {/* 전문 분야 태그 */}
           {caregiver.specialties?.length > 0 && (
             <div className="mt-5 pt-5 border-t border-gray-100">
               <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-3">{t('specialtiesTitle')}</p>
@@ -268,10 +359,7 @@ export default function CaregiverDetailPage() {
         <div className="bg-white border border-gray-200 rounded-2xl p-8">
           <h2 className="text-base font-bold text-gray-900 mb-1">{t('scheduleTitle')}</h2>
           <p className="text-xs text-gray-400 mb-5">초록색 = 근무 가능</p>
-          <AvailabilityGrid
-            availability={caregiver.caregiver_availability}
-            editable={false}
-          />
+          <AvailabilityGrid availability={caregiver.caregiver_availability} editable={false} />
         </div>
 
         {/* Reviews */}
@@ -280,34 +368,26 @@ export default function CaregiverDetailPage() {
             <h2 className="text-base font-bold text-gray-900">
               {t('reviewsTitle')}
               {reviewCount > 0 && (
-                <span className="ml-2 text-amber-500 font-extrabold">
-                  ★ {avgRating.toFixed(1)}
-                </span>
+                <span className="ml-2 text-amber-500 font-extrabold">★ {avgRating.toFixed(1)}</span>
               )}
             </h2>
             <span className="text-sm text-gray-400">{reviewCount}개</span>
           </div>
 
-          {/* 후기 작성 폼 */}
           {canReview && !hasReviewed && (
             <form onSubmit={handleSubmitReview}
               className="mb-6 p-5 bg-gray-50 rounded-2xl border border-gray-200">
               <h3 className="text-sm font-semibold text-gray-800 mb-4">{t('writeReview')}</h3>
-
               <p className="text-xs text-gray-500 mb-2">{t('ratingLabel')}</p>
               <div className="flex gap-1 mb-4">
                 {[1, 2, 3, 4, 5].map(star => (
-                  <button
-                    key={star}
-                    type="button"
-                    onClick={() => setReviewRating(star)}
+                  <button key={star} type="button" onClick={() => setReviewRating(star)}
                     className={`text-3xl transition-transform hover:scale-110
                       ${star <= reviewRating ? 'text-amber-400' : 'text-gray-200'}`}>
                     ★
                   </button>
                 ))}
               </div>
-
               <label className="block text-xs text-gray-500 mb-1.5">{t('commentLabel')}</label>
               <textarea
                 value={reviewComment}
@@ -317,16 +397,12 @@ export default function CaregiverDetailPage() {
                 className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm outline-none
                   focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100 transition resize-none mb-3 bg-white"
               />
-
               {reviewMessage && (
                 <p className={`text-sm mb-3 ${reviewMessage.type === 'success' ? 'text-emerald-600' : 'text-red-500'}`}>
                   {reviewMessage.text}
                 </p>
               )}
-
-              <button
-                type="submit"
-                disabled={reviewRating === 0 || reviewSubmitting}
+              <button type="submit" disabled={reviewRating === 0 || reviewSubmitting}
                 className="w-full bg-emerald-700 text-white py-2.5 rounded-xl text-sm font-semibold
                   hover:bg-emerald-800 transition disabled:opacity-50 disabled:cursor-not-allowed">
                 {reviewSubmitting ? t('reviewSubmitting') : t('submitReview')}
@@ -340,7 +416,6 @@ export default function CaregiverDetailPage() {
             </div>
           )}
 
-          {/* 후기 목록 */}
           {reviewCount === 0 ? (
             <p className="text-sm text-gray-400 text-center py-8">{t('noReviews')}</p>
           ) : (
@@ -367,23 +442,82 @@ export default function CaregiverDetailPage() {
 
       </main>
 
-      {/* Contact modal */}
-      {showContactModal && (
+      {/* 상담 예약 모달 */}
+      {showConsultModal && (
         <div
           className="fixed inset-0 bg-black/40 flex items-end sm:items-center justify-center z-50 px-4 pb-4 sm:pb-0"
-          onClick={() => setShowContactModal(false)}>
+          onClick={() => !consultSubmitting && setShowConsultModal(false)}>
           <div
-            className="bg-white rounded-2xl p-8 w-full max-w-sm text-center shadow-xl"
+            className="bg-white rounded-2xl w-full max-w-sm shadow-xl"
             onClick={e => e.stopPropagation()}>
-            <div className="text-4xl mb-4">💬</div>
-            <h3 className="text-lg font-bold text-gray-900 mb-2">채팅 기능 준비 중</h3>
-            <p className="text-sm text-gray-500 leading-relaxed">{t('contactSoon')}</p>
-            <button
-              onClick={() => setShowContactModal(false)}
-              className="mt-6 w-full border border-gray-200 text-gray-700 py-3 rounded-xl text-sm font-semibold
-                hover:bg-gray-50 transition">
-              닫기
-            </button>
+            <div className="flex items-center justify-between px-6 pt-6 pb-4 border-b border-gray-100">
+              <h3 className="text-lg font-bold text-gray-900">{tC('modalTitle')}</h3>
+              <button
+                onClick={() => setShowConsultModal(false)}
+                className="text-gray-400 hover:text-gray-600 text-xl leading-none">
+                ✕
+              </button>
+            </div>
+
+            <form onSubmit={handleConsultSubmit} className="p-6 space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                  {tC('dateLabel')}
+                </label>
+                <input
+                  type="date"
+                  value={consultDate}
+                  min={today}
+                  onChange={e => setConsultDate(e.target.value)}
+                  required
+                  className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm outline-none
+                    focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100 transition"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                  {tC('timeLabel')}
+                </label>
+                <select
+                  value={consultTime}
+                  onChange={e => setConsultTime(e.target.value)}
+                  required
+                  className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm outline-none
+                    focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100 transition bg-white">
+                  <option value="">시간 선택</option>
+                  {TIME_SLOTS.map(s => <option key={s} value={s}>{s}</option>)}
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                  {tC('notesLabel')}
+                </label>
+                <textarea
+                  value={consultNotes}
+                  onChange={e => setConsultNotes(e.target.value)}
+                  placeholder={tC('notesPlaceholder')}
+                  rows={3}
+                  className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm outline-none
+                    focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100 transition resize-none"
+                />
+              </div>
+
+              {consultMessage && (
+                <p className={`text-sm ${consultMessage.type === 'success' ? 'text-emerald-600' : 'text-red-500'}`}>
+                  {consultMessage.text}
+                </p>
+              )}
+
+              <button
+                type="submit"
+                disabled={consultSubmitting}
+                className="w-full bg-emerald-700 text-white py-3.5 rounded-xl font-semibold text-sm
+                  hover:bg-emerald-800 transition disabled:opacity-60">
+                {consultSubmitting ? tC('submitting') : tC('submitBtn')}
+              </button>
+            </form>
           </div>
         </div>
       )}

@@ -19,7 +19,7 @@ export default function Navbar() {
 
         <div className="hidden md:flex items-center gap-5 text-sm font-medium text-gray-600">
           <Link href={`/${locale}/search`} className="hover:text-emerald-700 transition">{t('findCaregivers')}</Link>
-          <Link href={`/${locale}/caregivers`} className="hover:text-emerald-700 transition">{t('forCaregivers')}</Link>
+          <Link href={`/${locale}/partners`} className="hover:text-emerald-700 transition">{t('forCaregivers')}</Link>
           <Link href={`/${locale}/auth/login`} className="hover:text-emerald-700 transition">{t('signIn')}</Link>
           <LanguageSwitcher />
           <Link href={`/${locale}/auth/signup`}
@@ -41,7 +41,7 @@ export default function Navbar() {
       {menuOpen && (
         <div className="md:hidden bg-white border-t border-gray-100 px-4 py-4 flex flex-col gap-4 text-sm font-medium text-gray-700">
           <Link href={`/${locale}/search`} onClick={() => setMenuOpen(false)}>{t('findCaregivers')}</Link>
-          <Link href={`/${locale}/caregivers`} onClick={() => setMenuOpen(false)}>{t('forCaregivers')}</Link>
+          <Link href={`/${locale}/partners`} onClick={() => setMenuOpen(false)}>{t('forCaregivers')}</Link>
           <Link href={`/${locale}/auth/login`} onClick={() => setMenuOpen(false)}>{t('signIn')}</Link>
           <Link href={`/${locale}/auth/signup`}
             className="bg-emerald-700 text-white text-center px-5 py-2 rounded-full"
