@@ -38,11 +38,24 @@ interface ConsultationCaregiver {
   profiles: { full_name: string; avatar_url: string | null } | null
 }
 
+type PayModalState = {
+  consultation: ConsultationFamily
+  step: 'confirm' | 'processing' | 'done' | 'error'
+  errorMsg?: string
+} | null
+
 const STATUS_STYLE: Record<string, string> = {
   pending:   'bg-amber-100 text-amber-700',
   accepted:  'bg-emerald-100 text-emerald-700',
   rejected:  'bg-red-100 text-red-600',
   completed: 'bg-gray-100 text-gray-600',
+}
+
+const STATUS_LABEL: Record<string, string> = {
+  pending:   '대기 중',
+  accepted:  '수락됨',
+  rejected:  '거절됨',
+  completed: '완료',
 }
 
 export default function ConsultationsPage() {
@@ -58,8 +71,7 @@ export default function ConsultationsPage() {
   const [replyTexts, setReplyTexts] = useState<Record<string, string>>({})
   const [actionLoading, setActionLoading] = useState<string | null>(null)
   const [paidIds, setPaidIds] = useState<Set<string>>(new Set())
-  const [payingId, setPayingId] = useState<string | null>(null)
-  const [payMessage, setPayMessage] = useState<{ id: string; type: 'success' | 'error'; text: string } | null>(null)
+  const [payModal, setPayModal] = useState<PayModalState>(null)
 
   useEffect(() => {
     async function load() {
@@ -84,7 +96,6 @@ export default function ConsultationsPage() {
         const list = (data as ConsultationFamily[]) || []
         setFamilyList(list)
 
-        // 이미 결제된 상담 ID 조회
         if (list.length > 0) {
           const ids = list.map(c => c.id)
           const { data: payData } = await supabase
@@ -145,15 +156,15 @@ export default function ConsultationsPage() {
   async function handlePayment(consultation: ConsultationFamily) {
     const amount = consultation.caregiver_profiles?.hourly_rate || 10000
     const paymentId = `carelink-${consultation.id}-${Date.now()}`
-    setPayingId(consultation.id)
-    setPayMessage(null)
+
+    setPayModal({ consultation, step: 'processing' })
 
     try {
       const response = await PortOne.requestPayment({
         storeId: process.env.NEXT_PUBLIC_PORTONE_STORE_ID!,
         channelKey: process.env.NEXT_PUBLIC_PORTONE_CHANNEL_KEY!,
         paymentId,
-        orderName: `요양보호사 상담 예약`,
+        orderName: '요양보호사 상담 예약',
         totalAmount: amount,
         currency: 'KRW',
         payMethod: 'CARD',
@@ -161,15 +172,10 @@ export default function ConsultationsPage() {
       })
 
       if (response?.code) {
-        // 사용자가 취소하거나 오류 발생
-        if (response.code !== 'FAILURE_TYPE_PG') {
-          setPayMessage({ id: consultation.id, type: 'error', text: t('payError') })
-        }
-        setPayingId(null)
+        setPayModal({ consultation, step: 'error', errorMsg: '결제가 취소됐습니다.' })
         return
       }
 
-      // 서버에서 결제 검증
       const verifyRes = await fetch('/api/payment/verify', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -178,14 +184,13 @@ export default function ConsultationsPage() {
 
       if (verifyRes.ok) {
         setPaidIds(prev => new Set([...prev, consultation.id]))
-        setPayMessage({ id: consultation.id, type: 'success', text: t('paySuccess') })
+        setPayModal({ consultation, step: 'done' })
       } else {
-        setPayMessage({ id: consultation.id, type: 'error', text: t('payError') })
+        setPayModal({ consultation, step: 'error', errorMsg: '결제 검증에 실패했습니다. 고객센터에 문의해 주세요.' })
       }
     } catch {
-      setPayMessage({ id: consultation.id, type: 'error', text: t('payError') })
+      setPayModal({ consultation, step: 'error', errorMsg: '결제 처리 중 오류가 발생했습니다.' })
     }
-    setPayingId(null)
   }
 
   if (loading) return (
@@ -232,8 +237,6 @@ export default function ConsultationsPage() {
                 const caregiverId = c.caregiver_profiles?.id
                 const amount = c.caregiver_profiles?.hourly_rate || 10000
                 const isPaid = paidIds.has(c.id)
-                const isPayingThis = payingId === c.id
-                const msg = payMessage?.id === c.id ? payMessage : null
 
                 return (
                   <div key={c.id} className="bg-white border border-gray-200 rounded-2xl p-6">
@@ -243,7 +246,7 @@ export default function ConsultationsPage() {
                         <p className="text-sm text-emerald-700">{licenseType}</p>
                       </div>
                       <span className={`shrink-0 text-xs font-semibold px-2.5 py-1 rounded-full ${STATUS_STYLE[c.status]}`}>
-                        {t(c.status)}
+                        {STATUS_LABEL[c.status]}
                       </span>
                     </div>
 
@@ -271,33 +274,30 @@ export default function ConsultationsPage() {
                     {c.status === 'accepted' && (
                       <div className="border-t border-gray-100 pt-4 mt-2">
                         {isPaid ? (
-                          <div className="flex items-center gap-2 text-emerald-700 text-sm font-semibold">
-                            <span>✅</span>
-                            <span>{t('paid')}</span>
-                            <span className="ml-auto text-xs text-gray-400">{t('escrowNotice')}</span>
+                          <div className="flex items-center gap-2">
+                            <div className="w-6 h-6 bg-emerald-100 rounded-full flex items-center justify-center">
+                              <svg width="12" height="10" viewBox="0 0 12 10" fill="none">
+                                <path d="M1 5l4 4 6-8" stroke="#059669" strokeWidth="1.8"
+                                  strokeLinecap="round" strokeLinejoin="round"/>
+                              </svg>
+                            </div>
+                            <span className="text-sm font-semibold text-emerald-700">결제 완료</span>
+                            <span className="ml-auto text-xs text-gray-400">서비스 완료 후 48시간 내 자동 정산</span>
                           </div>
                         ) : (
-                          <>
-                            <div className="flex items-center justify-between mb-3">
-                              <span className="text-sm text-gray-600">{t('payAmount')}</span>
-                              <span className="font-bold text-gray-900">
-                                {amount.toLocaleString()}원
-                              </span>
+                          <button
+                            onClick={() => setPayModal({ consultation: c, step: 'confirm' })}
+                            className="w-full flex items-center justify-between bg-emerald-600 hover:bg-emerald-700
+                              text-white px-5 py-3.5 rounded-2xl transition active:scale-[0.98]">
+                            <div className="text-left">
+                              <p className="text-xs text-emerald-200 mb-0.5">결제하기</p>
+                              <p className="font-bold text-base">{amount.toLocaleString()}원</p>
                             </div>
-                            <p className="text-xs text-gray-400 mb-3">{t('escrowNotice')}</p>
-                            <button
-                              onClick={() => handlePayment(c)}
-                              disabled={isPayingThis}
-                              className="w-full bg-emerald-700 text-white py-3 rounded-xl text-sm
-                                font-semibold hover:bg-emerald-800 transition disabled:opacity-50">
-                              {isPayingThis ? t('paying') : t('payBtn')}
-                            </button>
-                          </>
-                        )}
-                        {msg && (
-                          <p className={`text-xs mt-2 font-medium ${msg.type === 'success' ? 'text-emerald-600' : 'text-red-500'}`}>
-                            {msg.text}
-                          </p>
+                            <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                              <path d="M7 4l6 6-6 6" stroke="white" strokeWidth="2"
+                                strokeLinecap="round" strokeLinejoin="round"/>
+                            </svg>
+                          </button>
                         )}
                       </div>
                     )}
@@ -336,7 +336,7 @@ export default function ConsultationsPage() {
                         <p className="text-sm text-gray-500">{t('familyLabel')}</p>
                       </div>
                       <span className={`shrink-0 text-xs font-semibold px-2.5 py-1 rounded-full ${STATUS_STYLE[c.status]}`}>
-                        {t(c.status)}
+                        {STATUS_LABEL[c.status]}
                       </span>
                     </div>
 
@@ -400,6 +400,137 @@ export default function ConsultationsPage() {
           </div>
         )}
       </main>
+
+      {/* 결제 모달 */}
+      {payModal && (
+        <div
+          className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-end sm:items-center justify-center z-50 p-4"
+          onClick={() => payModal.step !== 'processing' && setPayModal(null)}>
+          <div
+            className="modal-enter bg-white rounded-3xl w-full max-w-sm shadow-2xl overflow-hidden"
+            onClick={e => e.stopPropagation()}>
+
+            {/* 확인 단계 */}
+            {payModal.step === 'confirm' && (
+              <div className="step-fwd">
+                <div className="h-1 bg-emerald-500" />
+                <div className="px-6 pt-6 pb-7">
+                  <div className="flex items-center justify-between mb-5">
+                    <p className="text-xs font-bold text-emerald-600 tracking-wide uppercase">결제 확인</p>
+                    <button
+                      onClick={() => setPayModal(null)}
+                      className="w-8 h-8 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center
+                        justify-center text-gray-500 text-sm transition">
+                      ✕
+                    </button>
+                  </div>
+
+                  <h3 className="text-xl font-extrabold text-gray-900 mb-1">안전하게 결제해 드릴게요</h3>
+                  <p className="text-sm text-gray-400 mb-5">서비스 완료 후 48시간 뒤에 요양보호사에게 전달됩니다</p>
+
+                  {/* 결제 정보 카드 */}
+                  <div className="bg-gray-50 rounded-2xl p-4 mb-5 space-y-3">
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm text-gray-500">서비스</span>
+                      <span className="text-sm font-semibold text-gray-900">요양보호사 상담 예약</span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm text-gray-500">일시</span>
+                      <span className="text-sm font-semibold text-gray-900">
+                        {payModal.consultation.requested_date} {payModal.consultation.requested_time}
+                      </span>
+                    </div>
+                    <div className="border-t border-gray-200 pt-3 flex justify-between items-center">
+                      <span className="text-sm font-bold text-gray-900">결제 금액</span>
+                      <span className="text-xl font-extrabold text-emerald-700">
+                        {(payModal.consultation.caregiver_profiles?.hourly_rate || 10000).toLocaleString()}원
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="flex items-start gap-2 bg-amber-50 border border-amber-100 rounded-xl px-3 py-2.5 mb-5">
+                    <span className="text-base mt-0.5 shrink-0">🔒</span>
+                    <p className="text-xs text-amber-700 leading-relaxed">
+                      결제 금액은 에스크로로 안전하게 보관됩니다. 서비스 완료 확인 후 자동 정산됩니다.
+                    </p>
+                  </div>
+
+                  <button
+                    onClick={() => handlePayment(payModal.consultation)}
+                    className="w-full bg-emerald-600 text-white py-4 rounded-2xl font-bold text-base
+                      hover:bg-emerald-700 active:scale-[0.98] transition">
+                    카드로 결제하기
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {/* 처리 중 */}
+            {payModal.step === 'processing' && (
+              <div className="fade-up px-6 py-12 text-center">
+                <div className="w-16 h-16 mx-auto mb-5 rounded-full border-4 border-emerald-100 border-t-emerald-600 animate-spin" />
+                <h3 className="text-lg font-bold text-gray-900 mb-1">결제 처리 중...</h3>
+                <p className="text-sm text-gray-400">잠시만 기다려 주세요</p>
+              </div>
+            )}
+
+            {/* 완료 */}
+            {payModal.step === 'done' && (
+              <div className="fade-up px-6 py-10 text-center">
+                <div className="pop-in mx-auto w-fit mb-5">
+                  <svg width="72" height="72" viewBox="0 0 72 72" fill="none">
+                    <circle cx="36" cy="36" r="33" stroke="#10b981" strokeWidth="3"
+                      strokeDasharray="208" className="ring-draw" />
+                    <path d="M22 36l11 11 17-20" stroke="#10b981" strokeWidth="3.5"
+                      strokeLinecap="round" strokeLinejoin="round"
+                      strokeDasharray="52" className="check-draw" fill="none"/>
+                  </svg>
+                </div>
+                <h3 className="text-xl font-extrabold text-gray-900 mb-2">결제 완료!</h3>
+                <p className="text-sm text-gray-500 leading-relaxed mb-6">
+                  결제가 안전하게 처리됐습니다.<br/>
+                  서비스 완료 후 48시간 내 자동으로 정산돼요.
+                </p>
+                <button
+                  onClick={() => setPayModal(null)}
+                  className="w-full bg-emerald-600 text-white py-3.5 rounded-2xl font-bold text-sm
+                    hover:bg-emerald-700 active:scale-[0.98] transition">
+                  확인
+                </button>
+              </div>
+            )}
+
+            {/* 오류 */}
+            {payModal.step === 'error' && (
+              <div className="fade-up px-6 py-10 text-center">
+                <div className="pop-in mx-auto w-fit mb-5">
+                  <svg width="72" height="72" viewBox="0 0 72 72" fill="none">
+                    <circle cx="36" cy="36" r="33" stroke="#f87171" strokeWidth="3"
+                      strokeDasharray="208" className="ring-draw" />
+                    <path d="M26 26l20 20M46 26L26 46" stroke="#f87171" strokeWidth="3.5"
+                      strokeLinecap="round" className="check-draw"/>
+                  </svg>
+                </div>
+                <h3 className="text-xl font-extrabold text-gray-900 mb-2">결제에 실패했어요</h3>
+                <p className="text-sm text-gray-500 mb-6">{payModal.errorMsg || '다시 시도해 주세요.'}</p>
+                <div className="flex gap-3">
+                  <button
+                    onClick={() => setPayModal(null)}
+                    className="flex-1 border-2 border-gray-200 text-gray-700 py-3 rounded-2xl font-semibold text-sm hover:bg-gray-50 transition">
+                    닫기
+                  </button>
+                  <button
+                    onClick={() => setPayModal({ ...payModal, step: 'confirm' })}
+                    className="flex-1 bg-emerald-600 text-white py-3 rounded-2xl font-semibold text-sm hover:bg-emerald-700 transition">
+                    다시 시도
+                  </button>
+                </div>
+              </div>
+            )}
+
+          </div>
+        </div>
+      )}
     </div>
   )
 }

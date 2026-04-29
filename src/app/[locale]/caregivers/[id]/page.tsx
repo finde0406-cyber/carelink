@@ -79,11 +79,23 @@ export default function CaregiverDetailPage() {
 
   // 상담 예약 모달
   const [showConsultModal, setShowConsultModal] = useState(false)
+  const [consultStep, setConsultStep] = useState<1 | 2 | 3 | 'done'>(1)
+  const [consultDir, setConsultDir] = useState<'fwd' | 'bwd'>('fwd')
   const [consultDate, setConsultDate] = useState('')
   const [consultTime, setConsultTime] = useState('')
   const [consultNotes, setConsultNotes] = useState('')
   const [consultSubmitting, setConsultSubmitting] = useState(false)
-  const [consultMessage, setConsultMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null)
+  const [consultError, setConsultError] = useState('')
+
+  function openConsultModal() {
+    setConsultStep(1)
+    setConsultDir('fwd')
+    setConsultDate('')
+    setConsultTime('')
+    setConsultNotes('')
+    setConsultError('')
+    setShowConsultModal(true)
+  }
 
   const today = new Date().toISOString().split('T')[0]
 
@@ -205,11 +217,10 @@ export default function CaregiverDetailPage() {
     setReviewSubmitting(false)
   }
 
-  async function handleConsultSubmit(e: React.FormEvent) {
-    e.preventDefault()
+  async function handleConsultSubmit() {
     if (!consultDate || !consultTime || !currentUserId) return
     setConsultSubmitting(true)
-    setConsultMessage(null)
+    setConsultError('')
 
     const { error } = await supabase.from('consultations').insert({
       family_id: currentUserId,
@@ -220,10 +231,9 @@ export default function CaregiverDetailPage() {
     })
 
     if (error) {
-      setConsultMessage({ type: 'error', text: tC('errorMsg') })
+      setConsultError(tC('errorMsg'))
     } else {
-      setConsultMessage({ type: 'success', text: tC('successMsg') })
-      // 이메일 알림 (실패해도 무시)
+      setConsultStep('done')
       const { data: newConsult } = await supabase
         .from('consultations')
         .select('id')
@@ -239,13 +249,6 @@ export default function CaregiverDetailPage() {
           body: JSON.stringify({ type: 'new_request', consultationId: newConsult.id }),
         }).catch(() => {})
       }
-      setTimeout(() => {
-        setShowConsultModal(false)
-        setConsultDate('')
-        setConsultTime('')
-        setConsultNotes('')
-        setConsultMessage(null)
-      }, 1500)
     }
     setConsultSubmitting(false)
   }
@@ -379,7 +382,7 @@ export default function CaregiverDetailPage() {
             </button>
           ) : canBook ? (
             <button
-              onClick={() => setShowConsultModal(true)}
+              onClick={openConsultModal}
               className="w-full mt-6 bg-emerald-700 text-white py-3.5 rounded-xl font-semibold
                 hover:bg-emerald-800 transition text-sm">
               {t('consultBtn')}
@@ -523,79 +526,172 @@ export default function CaregiverDetailPage() {
       {/* 상담 예약 모달 */}
       {showConsultModal && (
         <div
-          className="fixed inset-0 bg-black/40 flex items-end sm:items-center justify-center z-50 px-4 pb-4 sm:pb-0"
-          onClick={() => !consultSubmitting && setShowConsultModal(false)}>
+          className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-end sm:items-center justify-center z-50 p-4"
+          onClick={() => !consultSubmitting && consultStep !== 'done' && setShowConsultModal(false)}>
           <div
-            className="bg-white rounded-2xl w-full max-w-sm shadow-xl"
+            className="modal-enter bg-white rounded-3xl w-full max-w-sm shadow-2xl overflow-hidden relative"
             onClick={e => e.stopPropagation()}>
-            <div className="flex items-center justify-between px-6 pt-6 pb-4 border-b border-gray-100">
-              <h3 className="text-lg font-bold text-gray-900">{tC('modalTitle')}</h3>
+
+            {/* 진행 바 */}
+            {consultStep !== 'done' && (
+              <div className="h-1 bg-gray-100">
+                <div
+                  className="h-full bg-emerald-500 transition-all duration-400 ease-out"
+                  style={{ width: consultStep === 1 ? '33%' : consultStep === 2 ? '66%' : '100%' }}
+                />
+              </div>
+            )}
+
+            {/* 닫기 버튼 */}
+            {consultStep !== 'done' && !consultSubmitting && (
               <button
                 onClick={() => setShowConsultModal(false)}
-                className="text-gray-400 hover:text-gray-600 text-xl leading-none">
+                className="absolute top-4 right-4 w-8 h-8 rounded-full bg-gray-100 hover:bg-gray-200
+                  flex items-center justify-center text-gray-500 text-sm transition z-10">
                 ✕
               </button>
-            </div>
+            )}
 
-            <form onSubmit={handleConsultSubmit} className="p-6 space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1.5">
-                  {tC('dateLabel')}
-                </label>
+            {/* Step 1: 날짜 */}
+            {consultStep === 1 && (
+              <div key="cs1" className={`${consultDir === 'fwd' ? 'step-fwd' : 'step-bwd'} px-6 pt-6 pb-7`}>
+                <p className="text-xs font-bold text-emerald-600 tracking-wide uppercase mb-1">1 / 3 단계</p>
+                <h3 className="text-xl font-extrabold text-gray-900 mb-1">언제 방문해 드릴까요?</h3>
+                <p className="text-sm text-gray-400 mb-5">희망하시는 날짜를 선택해 주세요</p>
+
                 <input
                   type="date"
                   value={consultDate}
                   min={today}
                   onChange={e => setConsultDate(e.target.value)}
-                  required
-                  className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm outline-none
-                    focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100 transition"
+                  className="w-full border-2 border-gray-200 rounded-2xl px-4 py-4 text-base outline-none
+                    focus:border-emerald-500 bg-gray-50 focus:bg-white transition mb-5"
                 />
-              </div>
 
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1.5">
-                  {tC('timeLabel')}
-                </label>
-                <select
-                  value={consultTime}
-                  onChange={e => setConsultTime(e.target.value)}
-                  required
-                  className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm outline-none
-                    focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100 transition bg-white">
-                  <option value="">시간 선택</option>
-                  {TIME_SLOTS.map(s => <option key={s} value={s}>{s}</option>)}
-                </select>
+                <button
+                  onClick={() => { setConsultDir('fwd'); setConsultStep(2) }}
+                  disabled={!consultDate}
+                  className="w-full bg-emerald-600 text-white py-4 rounded-2xl font-bold text-base
+                    hover:bg-emerald-700 active:scale-[0.98] transition disabled:opacity-35 disabled:cursor-not-allowed">
+                  다음 →
+                </button>
               </div>
+            )}
 
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1.5">
-                  {tC('notesLabel')}
-                </label>
+            {/* Step 2: 시간 */}
+            {consultStep === 2 && (
+              <div key="cs2" className={`${consultDir === 'fwd' ? 'step-fwd' : 'step-bwd'} px-6 pt-6 pb-7`}>
+                <p className="text-xs font-bold text-emerald-600 tracking-wide uppercase mb-1">2 / 3 단계</p>
+                <h3 className="text-xl font-extrabold text-gray-900 mb-1">몇 시가 좋으세요?</h3>
+                <p className="text-sm text-gray-400 mb-4">편하신 시간을 선택해 주세요</p>
+
+                <div className="grid grid-cols-2 gap-2 mb-5">
+                  {TIME_SLOTS.map(slot => (
+                    <button
+                      key={slot}
+                      type="button"
+                      onClick={() => {
+                        setConsultTime(slot)
+                        setConsultDir('fwd')
+                        setTimeout(() => setConsultStep(3), 180)
+                      }}
+                      className={`py-3.5 px-3 rounded-2xl text-sm font-semibold border-2 transition active:scale-[0.96]
+                        ${consultTime === slot
+                          ? 'border-emerald-500 bg-emerald-50 text-emerald-700'
+                          : 'border-gray-200 text-gray-700 hover:border-emerald-300 hover:bg-gray-50'
+                        }`}>
+                      {slot}
+                    </button>
+                  ))}
+                </div>
+
+                <button
+                  onClick={() => { setConsultDir('bwd'); setConsultStep(1) }}
+                  className="w-full text-gray-400 text-sm py-2 hover:text-gray-600 transition text-center">
+                  ← 날짜 다시 선택
+                </button>
+              </div>
+            )}
+
+            {/* Step 3: 요청사항 + 확인 */}
+            {consultStep === 3 && (
+              <div key="cs3" className={`${consultDir === 'fwd' ? 'step-fwd' : 'step-bwd'} px-6 pt-6 pb-7`}>
+                <p className="text-xs font-bold text-emerald-600 tracking-wide uppercase mb-1">3 / 3 단계</p>
+                <h3 className="text-xl font-extrabold text-gray-900 mb-1">거의 다 됐어요!</h3>
+                <p className="text-sm text-gray-400 mb-4">전달하고 싶은 내용이 있으면 적어주세요</p>
+
+                {/* 선택 요약 */}
+                <div className="bg-emerald-50 border border-emerald-100 rounded-2xl px-4 py-3.5 mb-4 flex items-center gap-3">
+                  <div className="w-9 h-9 bg-emerald-100 rounded-xl flex items-center justify-center shrink-0">
+                    <span className="text-base">📅</span>
+                  </div>
+                  <div>
+                    <p className="text-xs text-emerald-600 font-semibold">예약 일시</p>
+                    <p className="text-sm font-bold text-gray-900 mt-0.5">{consultDate} · {consultTime}</p>
+                  </div>
+                </div>
+
                 <textarea
                   value={consultNotes}
                   onChange={e => setConsultNotes(e.target.value)}
-                  placeholder={tC('notesPlaceholder')}
+                  placeholder="예) 거동이 불편하세요, 치매 초기 단계입니다 (선택사항)"
                   rows={3}
-                  className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm outline-none
-                    focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100 transition resize-none"
+                  autoFocus
+                  className="w-full border-2 border-gray-200 rounded-2xl px-4 py-3 text-sm outline-none
+                    focus:border-emerald-500 bg-gray-50 focus:bg-white transition resize-none mb-4"
                 />
+
+                {consultError && (
+                  <p className="text-sm text-red-500 mb-3 fade-up">{consultError}</p>
+                )}
+
+                <button
+                  onClick={handleConsultSubmit}
+                  disabled={consultSubmitting}
+                  className="w-full bg-emerald-600 text-white py-4 rounded-2xl font-bold text-base
+                    hover:bg-emerald-700 active:scale-[0.98] transition disabled:opacity-60
+                    flex items-center justify-center gap-2 mb-2">
+                  {consultSubmitting
+                    ? <><span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" /> 신청 중...</>
+                    : '상담 신청하기'
+                  }
+                </button>
+
+                <button
+                  onClick={() => { setConsultDir('bwd'); setConsultStep(2) }}
+                  disabled={consultSubmitting}
+                  className="w-full text-gray-400 text-sm py-2 hover:text-gray-600 transition text-center">
+                  ← 시간 다시 선택
+                </button>
               </div>
+            )}
 
-              {consultMessage && (
-                <p className={`text-sm ${consultMessage.type === 'success' ? 'text-emerald-600' : 'text-red-500'}`}>
-                  {consultMessage.text}
+            {/* Done */}
+            {consultStep === 'done' && (
+              <div className="fade-up px-6 py-10 text-center">
+                <div className="pop-in mx-auto w-fit mb-5">
+                  <svg width="72" height="72" viewBox="0 0 72 72" fill="none">
+                    <circle cx="36" cy="36" r="33" stroke="#10b981" strokeWidth="3"
+                      strokeDasharray="208" className="ring-draw" />
+                    <path d="M22 36l11 11 17-20" stroke="#10b981" strokeWidth="3.5"
+                      strokeLinecap="round" strokeLinejoin="round"
+                      strokeDasharray="52" className="check-draw" fill="none"/>
+                  </svg>
+                </div>
+                <h3 className="text-xl font-extrabold text-gray-900 mb-2">신청 완료!</h3>
+                <p className="text-sm text-gray-500 leading-relaxed mb-6">
+                  요양보호사가 확인 후 답변을 드릴 거예요.<br/>
+                  상담 현황은 대시보드에서 확인하실 수 있어요.
                 </p>
-              )}
+                <button
+                  onClick={() => setShowConsultModal(false)}
+                  className="w-full bg-emerald-600 text-white py-3.5 rounded-2xl font-bold text-sm
+                    hover:bg-emerald-700 active:scale-[0.98] transition">
+                  확인
+                </button>
+              </div>
+            )}
 
-              <button
-                type="submit"
-                disabled={consultSubmitting}
-                className="w-full bg-emerald-700 text-white py-3.5 rounded-xl font-semibold text-sm
-                  hover:bg-emerald-800 transition disabled:opacity-60">
-                {consultSubmitting ? tC('submitting') : tC('submitBtn')}
-              </button>
-            </form>
           </div>
         </div>
       )}
