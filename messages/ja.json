@@ -230,7 +230,14 @@
     "dateTimeLabel": "希望日時",
     "notesDisplayLabel": "ご要望",
     "backToDashboard": "← ダッシュボード",
-    "viewCaregiver": "プロフィールを見る"
+    "viewCaregiver": "プロフィールを見る",
+    "payBtn": "支払う",
+    "paying": "処理中...",
+    "paid": "支払済み",
+    "paySuccess": "お支払いが完了しました。",
+    "payError": "支払い処理中にエラーが発生しました。",
+    "payAmount": "支払い金額",
+    "escrowNotice": "サービス完了後48時間以内に自動精算されます。"
   },
   "favorites": {
     "listTitle": "お気に入り",

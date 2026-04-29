@@ -5,6 +5,7 @@ import { useTranslations, useLocale } from 'next-intl'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import Link from 'next/link'
+import * as PortOne from '@portone/browser-sdk/v2'
 
 interface ConsultationFamily {
   id: string
@@ -19,6 +20,7 @@ interface ConsultationFamily {
   caregiver_profiles: {
     id: string
     license_type: string
+    hourly_rate: number
     profiles: { full_name: string; avatar_url: string | null } | null
   } | null
 }
@@ -55,6 +57,9 @@ export default function ConsultationsPage() {
   const [caregiverList, setCaregiverList] = useState<ConsultationCaregiver[]>([])
   const [replyTexts, setReplyTexts] = useState<Record<string, string>>({})
   const [actionLoading, setActionLoading] = useState<string | null>(null)
+  const [paidIds, setPaidIds] = useState<Set<string>>(new Set())
+  const [payingId, setPayingId] = useState<string | null>(null)
+  const [payMessage, setPayMessage] = useState<{ id: string; type: 'success' | 'error'; text: string } | null>(null)
 
   useEffect(() => {
     async function load() {
@@ -73,10 +78,23 @@ export default function ConsultationsPage() {
       if (userRole === 'family') {
         const { data } = await supabase
           .from('consultations')
-          .select('*, caregiver_profiles(id, license_type, profiles(full_name, avatar_url))')
+          .select('*, caregiver_profiles(id, license_type, hourly_rate, profiles(full_name, avatar_url))')
           .eq('family_id', user.id)
           .order('created_at', { ascending: false })
-        setFamilyList((data as ConsultationFamily[]) || [])
+        const list = (data as ConsultationFamily[]) || []
+        setFamilyList(list)
+
+        // 이미 결제된 상담 ID 조회
+        if (list.length > 0) {
+          const ids = list.map(c => c.id)
+          const { data: payData } = await supabase
+            .from('payments')
+            .select('consultation_id')
+            .in('consultation_id', ids)
+          if (payData) {
+            setPaidIds(new Set(payData.map((p: { consultation_id: string }) => p.consultation_id)))
+          }
+        }
 
       } else if (userRole === 'caregiver') {
         const { data: cp } = await supabase
@@ -108,7 +126,6 @@ export default function ConsultationsPage() {
     await supabase.from('consultations').update({ status }).eq('id', id)
     setCaregiverList(prev => prev.map(c => c.id === id ? { ...c, status } : c))
     setActionLoading(null)
-    // 이메일 알림 (실패해도 무시)
     fetch('/api/email', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -123,6 +140,52 @@ export default function ConsultationsPage() {
     await supabase.from('consultations').update({ caregiver_reply: reply }).eq('id', id)
     setCaregiverList(prev => prev.map(c => c.id === id ? { ...c, caregiver_reply: reply } : c))
     setActionLoading(null)
+  }
+
+  async function handlePayment(consultation: ConsultationFamily) {
+    const amount = consultation.caregiver_profiles?.hourly_rate || 10000
+    const paymentId = `carelink-${consultation.id}-${Date.now()}`
+    setPayingId(consultation.id)
+    setPayMessage(null)
+
+    try {
+      const response = await PortOne.requestPayment({
+        storeId: process.env.NEXT_PUBLIC_PORTONE_STORE_ID!,
+        channelKey: process.env.NEXT_PUBLIC_PORTONE_CHANNEL_KEY!,
+        paymentId,
+        orderName: `요양보호사 상담 예약`,
+        totalAmount: amount,
+        currency: 'KRW',
+        payMethod: 'CARD',
+        alipayPlus: {},
+      })
+
+      if (response?.code) {
+        // 사용자가 취소하거나 오류 발생
+        if (response.code !== 'FAILURE_TYPE_PG') {
+          setPayMessage({ id: consultation.id, type: 'error', text: t('payError') })
+        }
+        setPayingId(null)
+        return
+      }
+
+      // 서버에서 결제 검증
+      const verifyRes = await fetch('/api/payment/verify', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ paymentId, consultationId: consultation.id, amount }),
+      })
+
+      if (verifyRes.ok) {
+        setPaidIds(prev => new Set([...prev, consultation.id]))
+        setPayMessage({ id: consultation.id, type: 'success', text: t('paySuccess') })
+      } else {
+        setPayMessage({ id: consultation.id, type: 'error', text: t('payError') })
+      }
+    } catch {
+      setPayMessage({ id: consultation.id, type: 'error', text: t('payError') })
+    }
+    setPayingId(null)
   }
 
   if (loading) return (
@@ -167,6 +230,11 @@ export default function ConsultationsPage() {
                 const name = c.caregiver_profiles?.profiles?.full_name || '—'
                 const licenseType = c.caregiver_profiles?.license_type || ''
                 const caregiverId = c.caregiver_profiles?.id
+                const amount = c.caregiver_profiles?.hourly_rate || 10000
+                const isPaid = paidIds.has(c.id)
+                const isPayingThis = payingId === c.id
+                const msg = payMessage?.id === c.id ? payMessage : null
+
                 return (
                   <div key={c.id} className="bg-white border border-gray-200 rounded-2xl p-6">
                     <div className="flex items-start justify-between mb-4">
@@ -199,11 +267,48 @@ export default function ConsultationsPage() {
                       </div>
                     )}
 
+                    {/* 결제 영역 */}
+                    {c.status === 'accepted' && (
+                      <div className="border-t border-gray-100 pt-4 mt-2">
+                        {isPaid ? (
+                          <div className="flex items-center gap-2 text-emerald-700 text-sm font-semibold">
+                            <span>✅</span>
+                            <span>{t('paid')}</span>
+                            <span className="ml-auto text-xs text-gray-400">{t('escrowNotice')}</span>
+                          </div>
+                        ) : (
+                          <>
+                            <div className="flex items-center justify-between mb-3">
+                              <span className="text-sm text-gray-600">{t('payAmount')}</span>
+                              <span className="font-bold text-gray-900">
+                                {amount.toLocaleString()}원
+                              </span>
+                            </div>
+                            <p className="text-xs text-gray-400 mb-3">{t('escrowNotice')}</p>
+                            <button
+                              onClick={() => handlePayment(c)}
+                              disabled={isPayingThis}
+                              className="w-full bg-emerald-700 text-white py-3 rounded-xl text-sm
+                                font-semibold hover:bg-emerald-800 transition disabled:opacity-50">
+                              {isPayingThis ? t('paying') : t('payBtn')}
+                            </button>
+                          </>
+                        )}
+                        {msg && (
+                          <p className={`text-xs mt-2 font-medium ${msg.type === 'success' ? 'text-emerald-600' : 'text-red-500'}`}>
+                            {msg.text}
+                          </p>
+                        )}
+                      </div>
+                    )}
+
                     {caregiverId && (
-                      <Link href={`/${locale}/caregivers/${caregiverId}`}
-                        className="text-sm text-emerald-700 font-semibold hover:underline">
-                        {t('viewCaregiver')} →
-                      </Link>
+                      <div className="mt-4">
+                        <Link href={`/${locale}/caregivers/${caregiverId}`}
+                          className="text-sm text-emerald-700 font-semibold hover:underline">
+                          {t('viewCaregiver')} →
+                        </Link>
+                      </div>
                     )}
                   </div>
                 )

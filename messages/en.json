@@ -254,7 +254,14 @@
     "dateTimeLabel": "Requested Date & Time",
     "notesDisplayLabel": "Notes",
     "backToDashboard": "← Dashboard",
-    "viewCaregiver": "View Profile"
+    "viewCaregiver": "View Profile",
+    "payBtn": "Pay Now",
+    "paying": "Processing...",
+    "paid": "Paid",
+    "paySuccess": "Payment completed successfully.",
+    "payError": "Payment processing failed.",
+    "payAmount": "Amount",
+    "escrowNotice": "Funds will be released automatically 48 hours after service."
   },
   "favorites": {
     "listTitle": "Saved Caregivers",

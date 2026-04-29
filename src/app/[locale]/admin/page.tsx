@@ -1,7 +1,8 @@
 'use client'
 
 import { useState, useEffect, useCallback } from 'react'
-import { useRouter, useLocale } from 'next/navigation'
+import { useRouter } from 'next/navigation'
+import { useLocale } from 'next-intl'
 import { createClient } from '@/lib/supabase/client'
 import Link from 'next/link'
 
@@ -191,6 +192,7 @@ export default function AdminPage() {
           ) : data.length === 0 ? (
             <div className="text-center py-16 text-gray-400">데이터가 없습니다</div>
           ) : (
+            <>
             {/* 모바일 카드 뷰 (md 미만) */}
             <div className="md:hidden divide-y divide-gray-50">
               {data.map((item: any) => (
@@ -415,7 +417,7 @@ export default function AdminPage() {
                 </table>
               )}
             </div>
-            </div>
+            </>
           )}
         </div>
       </main>

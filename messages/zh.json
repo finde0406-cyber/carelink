@@ -247,7 +247,14 @@
     "dateTimeLabel": "希望日期时间",
     "notesDisplayLabel": "备注",
     "backToDashboard": "← 仪表盘",
-    "viewCaregiver": "查看资料"
+    "viewCaregiver": "查看资料",
+    "payBtn": "立即支付",
+    "paying": "处理中...",
+    "paid": "已支付",
+    "paySuccess": "支付成功。",
+    "payError": "支付处理时发生错误。",
+    "payAmount": "支付金额",
+    "escrowNotice": "服务完成后48小时内自动结算。"
   },
   "favorites": {
     "listTitle": "我的收藏",

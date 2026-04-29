@@ -239,7 +239,14 @@
     "dateTimeLabel": "희망 일시",
     "notesDisplayLabel": "요청사항",
     "backToDashboard": "← 대시보드",
-    "viewCaregiver": "프로필 보기"
+    "viewCaregiver": "프로필 보기",
+    "payBtn": "결제하기",
+    "paying": "결제 중...",
+    "paid": "결제 완료",
+    "paySuccess": "결제가 완료됐습니다.",
+    "payError": "결제 처리 중 오류가 발생했습니다.",
+    "payAmount": "결제 금액",
+    "escrowNotice": "서비스 완료 후 48시간 내 자동 정산됩니다."
   },
   "favorites": {
     "listTitle": "즐겨찾기",
