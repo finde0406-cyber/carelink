@@ -10,7 +10,7 @@ export async function middleware(request: NextRequest) {
 
   // Supabase auth check for protected routes
   const pathname = request.nextUrl.pathname
-  const protectedPattern = /^\/(ko|en|zh|ja)\/(dashboard|caregivers\/profile|consultations|favorites)/
+  const protectedPattern = /^\/(ko|en|zh|ja)\/(dashboard|caregivers\/profile|consultations|favorites|admin)/
 
   if (protectedPattern.test(pathname)) {
     const supabase = createServerClient(

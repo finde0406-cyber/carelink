@@ -15,6 +15,7 @@ export default function DashboardPage() {
   const supabase = createClient()
 
   const [profile, setProfile] = useState<{ full_name: string; role: string } | null>(null)
+  const [isAdmin, setIsAdmin] = useState(false)
   const [loading, setLoading] = useState(true)
   const [showDeleteModal, setShowDeleteModal] = useState(false)
   const [deleting, setDeleting] = useState(false)
@@ -39,6 +40,7 @@ export default function DashboardPage() {
         .single()
 
       setProfile(data)
+      setIsAdmin(user.email === 'wldwm83@gmail.com')
       setLoading(false)
     }
     load()
@@ -159,7 +161,23 @@ export default function DashboardPage() {
           )}
         </div>
 
-        <div className="mt-12 pt-8 border-t border-gray-200 text-center">
+        {isAdmin && (
+          <Link
+            href={`/${locale}/admin`}
+            className="mt-8 flex items-center justify-between bg-red-50 border border-red-100
+              rounded-2xl p-5 hover:bg-red-100 transition group">
+            <div className="flex items-center gap-3">
+              <span className="text-2xl">⚙️</span>
+              <div>
+                <p className="font-bold text-gray-900 text-sm">관리자 페이지</p>
+                <p className="text-xs text-gray-500">사용자·프로필·리뷰·상담 관리</p>
+              </div>
+            </div>
+            <span className="text-gray-400 group-hover:text-gray-600 text-lg">→</span>
+          </Link>
+        )}
+
+        <div className="mt-8 pt-8 border-t border-gray-200 text-center">
           <button
             onClick={() => setShowDeleteModal(true)}
             className="text-xs text-gray-400 hover:text-red-500 transition underline underline-offset-2">
