@@ -122,8 +122,20 @@ export default function CaregiverDetailPage() {
 
         setHasReviewed(reviewData.some(r => r.reviewer_id === user.id))
 
-        const eligible = profileData?.role === 'family' && data?.user_id !== user.id
-        setCanReview(!!eligible)
+        // 수락된 예약이 있는 가족만 리뷰 가능
+        let hasAcceptedConsult = false
+        if (profileData?.role === 'family' && data?.user_id !== user.id) {
+          const { data: consultCheck } = await supabase
+            .from('consultations')
+            .select('id')
+            .eq('family_id', user.id)
+            .eq('caregiver_id', id)
+            .in('status', ['accepted', 'completed'])
+            .limit(1)
+            .maybeSingle()
+          hasAcceptedConsult = !!consultCheck
+        }
+        setCanReview(hasAcceptedConsult)
         setCanBook(profileData?.role === 'family')
 
         const { data: favData } = await supabase
@@ -204,6 +216,22 @@ export default function CaregiverDetailPage() {
       setConsultMessage({ type: 'error', text: tC('errorMsg') })
     } else {
       setConsultMessage({ type: 'success', text: tC('successMsg') })
+      // 이메일 알림 (실패해도 무시)
+      const { data: newConsult } = await supabase
+        .from('consultations')
+        .select('id')
+        .eq('family_id', currentUserId)
+        .eq('caregiver_id', id)
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .single()
+      if (newConsult?.id) {
+        fetch('/api/email', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ type: 'new_request', consultationId: newConsult.id }),
+        }).catch(() => {})
+      }
       setTimeout(() => {
         setShowConsultModal(false)
         setConsultDate('')
@@ -399,6 +427,15 @@ export default function CaregiverDetailPage() {
                 ✍️ 로그인하면 리뷰를 작성할 수 있어요 →
               </span>
             </button>
+          )}
+
+          {/* 로그인했지만 수락된 예약 없음 */}
+          {currentUserId && !canReview && !hasReviewed && (
+            <div className="mb-6 p-4 bg-gray-50 rounded-xl border border-dashed border-gray-200">
+              <p className="text-sm text-gray-400">
+                ✍️ 상담이 수락된 후 리뷰를 작성할 수 있습니다
+              </p>
+            </div>
           )}
 
           {/* 로그인 + 가족 + 미작성 */}

@@ -108,6 +108,12 @@ export default function ConsultationsPage() {
     await supabase.from('consultations').update({ status }).eq('id', id)
     setCaregiverList(prev => prev.map(c => c.id === id ? { ...c, status } : c))
     setActionLoading(null)
+    // 이메일 알림 (실패해도 무시)
+    fetch('/api/email', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ type: status, consultationId: id }),
+    }).catch(() => {})
   }
 
   async function saveReply(id: string) {
