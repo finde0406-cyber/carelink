@@ -12,18 +12,7 @@ export default async function PrivacyPage({
   const { locale } = await params
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <header className="bg-white border-b border-gray-100 px-4 py-4">
-        <div className="max-w-3xl mx-auto flex items-center justify-between">
-          <Link href={`/${locale}`} className="text-xl font-extrabold text-emerald-700">
-            Care<span className="text-amber-400">Link</span>
-          </Link>
-          <Link href={`/${locale}`} className="text-sm text-gray-500 hover:text-gray-700">
-            ← 홈
-          </Link>
-        </div>
-      </header>
-
+    <div className="min-h-screen bg-gray-50 pt-16">
       <main className="max-w-3xl mx-auto px-4 py-12">
         <h1 className="text-2xl font-extrabold text-gray-900 mb-2">개인정보처리방침</h1>
         <p className="text-sm text-gray-400 mb-10">최종 업데이트: 2025년 1월 1일</p>

@@ -40,7 +40,11 @@ export default function LoginPage() {
     const { error } = await supabase.auth.signInWithPassword({ email, password })
 
     if (error) {
-      setError(t('error'))
+      if (error.message === 'Email not confirmed') {
+        setError('이메일 인증이 필요합니다. 받은 편지함의 인증 링크를 클릭해주세요. (스팸 폴더도 확인해주세요)')
+      } else {
+        setError(t('error'))
+      }
       setLoading(false)
       return
     }

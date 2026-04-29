@@ -52,11 +52,6 @@ export default function DashboardPage() {
     load()
   }, [])
 
-  async function handleLogout() {
-    await supabase.auth.signOut()
-    router.push(`/${locale}`)
-  }
-
   async function handleDeleteAccount() {
     setDeleting(true)
     const res = await fetch('/api/delete-account', { method: 'DELETE' })
@@ -94,23 +89,7 @@ export default function DashboardPage() {
     : profile?.role === 'specialist' ? t('roleSpecialist') : t('roleFamily')
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <header className="bg-white border-b border-gray-100 px-4 py-4">
-        <div className="max-w-4xl mx-auto flex items-center justify-between">
-          <Link href={`/${locale}`} className="text-xl font-extrabold text-emerald-700">
-            Care<span className="text-amber-400">Link</span>
-          </Link>
-          <div className="flex items-center gap-2">
-            <NotificationBell />
-            <button
-              onClick={handleLogout}
-              className="text-sm text-gray-500 hover:text-gray-700">
-              {t('logout')}
-            </button>
-          </div>
-        </div>
-      </header>
-
+    <div className="min-h-screen bg-gray-50 pt-16">
       {showVerifiedBanner && (
         <div className="bg-emerald-600 text-white text-center text-sm font-medium py-3 px-4">
           ✅ 이메일 인증이 완료됐습니다! CareLink에 오신 걸 환영해요.
@@ -118,6 +97,9 @@ export default function DashboardPage() {
       )}
 
       <main className="max-w-4xl mx-auto px-4 py-10">
+        <div className="flex justify-end mb-4">
+          <NotificationBell />
+        </div>
         <div className="bg-emerald-700 text-white rounded-2xl p-8 mb-8">
           <p className="text-emerald-200 text-sm font-medium mb-1">{roleLabel}</p>
           <h1 className="text-2xl font-extrabold">
@@ -147,11 +129,12 @@ export default function DashboardPage() {
                 <h3 className="font-bold text-gray-900 mb-1">{t('myConsultations')}</h3>
                 <p className="text-sm text-gray-500">{t('myConsultationsDesc')}</p>
               </Link>
-              <div className="bg-white border border-gray-200 rounded-2xl p-6 opacity-60">
-                <div className="text-3xl mb-3">📜</div>
+              <Link href={`/${locale}/search?type=specialist`}
+                className="bg-white border border-gray-200 rounded-2xl p-6 hover:shadow-md transition hover:-translate-y-0.5">
+                <div className="text-3xl mb-3">⚖️</div>
                 <h3 className="font-bold text-gray-900 mb-1">{t('findSpecialist')}</h3>
-                <p className="text-sm text-gray-500">{t('comingSoon')}</p>
-              </div>
+                <p className="text-sm text-gray-500">변호사·세무사·법무사를 찾아보세요</p>
+              </Link>
             </>
           )}
 
@@ -173,11 +156,20 @@ export default function DashboardPage() {
           )}
 
           {profile?.role === 'specialist' && (
-            <div className="bg-white border border-gray-200 rounded-2xl p-6 opacity-60">
-              <div className="text-3xl mb-3">📋</div>
-              <h3 className="font-bold text-gray-900 mb-1">{t('findSpecialist')}</h3>
-              <p className="text-sm text-gray-500">{t('comingSoon')}</p>
-            </div>
+            <>
+              <Link href={`/${locale}/specialists/profile`}
+                className="bg-white border border-gray-200 rounded-2xl p-6 hover:shadow-md transition hover:-translate-y-0.5">
+                <div className="text-3xl mb-3">👤</div>
+                <h3 className="font-bold text-gray-900 mb-1">내 프로필 등록/수정</h3>
+                <p className="text-sm text-gray-500">전문가 프로필을 등록하고 관리하세요</p>
+              </Link>
+              <Link href={`/${locale}/consultations`}
+                className="bg-white border border-gray-200 rounded-2xl p-6 hover:shadow-md transition hover:-translate-y-0.5">
+                <div className="text-3xl mb-3">📅</div>
+                <h3 className="font-bold text-gray-900 mb-1">상담 요청 관리</h3>
+                <p className="text-sm text-gray-500">가족으로부터 온 상담 요청을 확인하세요</p>
+              </Link>
+            </>
           )}
         </div>
 

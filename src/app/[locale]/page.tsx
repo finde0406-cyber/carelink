@@ -1,6 +1,5 @@
 import Link from 'next/link'
 import { getTranslations } from 'next-intl/server'
-import Navbar from '@/components/layout/Navbar'
 
 export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params
@@ -21,8 +20,6 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
 
   return (
     <>
-      <Navbar />
-
       {/* HERO */}
       <section className="min-h-screen flex flex-col items-center justify-center text-center px-4 pt-24 pb-16
         bg-gradient-to-b from-emerald-50 to-white">

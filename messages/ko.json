@@ -41,7 +41,7 @@
       "tags": ["방문 요양", "의료 보조", "치매 케어", "단기 돌봄"]
     },
     "estate": {
-      "title": "상속 · 법률 전문가",
+      "title": "법률 · 세무 전문가",
       "desc": "신뢰할 수 있는 변호사, 세무사, 법무사와 연결됩니다.",
       "tags": ["유언장 작성", "상속세 상담", "자산 이전", "법률 조언"]
     }
@@ -196,7 +196,7 @@
     "roleSpecialist": "전문가",
     "findCaregiver": "요양보호사 찾기",
     "findCaregiverDesc": "지역별 요양보호사를 검색하세요",
-    "findSpecialist": "상속 전문가 찾기",
+    "findSpecialist": "법률·세무 전문가 찾기",
     "comingSoon": "준비 중입니다",
     "myProfile": "프로필 등록/수정",
     "myProfileDesc": "나의 자격증과 경력을 등록하세요",

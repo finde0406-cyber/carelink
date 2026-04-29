@@ -17,28 +17,7 @@ export default function PartnersPage() {
   const locale = useLocale()
 
   return (
-    <div className="min-h-screen bg-white">
-      {/* Top nav bar */}
-      <nav className="fixed top-0 left-0 right-0 z-50 bg-white/90 backdrop-blur border-b border-gray-100">
-        <div className="max-w-5xl mx-auto px-4 h-16 flex items-center justify-between">
-          <Link href={`/${locale}`} className="text-2xl font-extrabold tracking-tight text-emerald-700">
-            Care<span className="text-amber-400">Link</span>
-          </Link>
-          <div className="flex items-center gap-4 text-sm font-medium">
-            <Link href={`/${locale}/search`} className="text-gray-600 hover:text-emerald-700 transition hidden sm:block">
-              전문가 찾기
-            </Link>
-            <Link href={`/${locale}/auth/login`} className="text-gray-600 hover:text-emerald-700 transition">
-              로그인
-            </Link>
-            <Link
-              href={`/${locale}/auth/signup`}
-              className="bg-emerald-700 text-white px-5 py-2 rounded-full hover:bg-emerald-800 transition">
-              무료 가입
-            </Link>
-          </div>
-        </div>
-      </nav>
+    <div className="min-h-screen bg-white pt-16">
 
       {/* Hero */}
       <section className="relative bg-gradient-to-br from-emerald-700 via-emerald-600 to-teal-500 text-white overflow-hidden">
@@ -235,6 +214,35 @@ export default function PartnersPage() {
                 <p className="text-gray-500 text-sm leading-relaxed">{faq.a}</p>
               </div>
             ))}
+          </div>
+        </div>
+      </section>
+
+      {/* 등록 선택 섹션 */}
+      <section className="py-20 bg-white">
+        <div className="max-w-3xl mx-auto px-4 text-center">
+          <span className="text-emerald-600 text-sm font-bold uppercase tracking-widest">파트너 등록</span>
+          <h2 className="text-3xl font-extrabold text-gray-900 mt-2 mb-3">어떤 전문가로 등록하시겠어요?</h2>
+          <p className="text-gray-500 mb-10">가입 후 해당 등록 페이지로 이동합니다</p>
+          <div className="grid sm:grid-cols-2 gap-5">
+            <div className="bg-emerald-50 border-2 border-emerald-200 rounded-2xl p-8 text-left hover:border-emerald-400 transition group">
+              <div className="text-4xl mb-4">🏥</div>
+              <h3 className="text-lg font-extrabold text-gray-900 mb-2">요양보호사 · 의료 전문가</h3>
+              <p className="text-sm text-gray-500 mb-6 leading-relaxed">요양보호사, 간호사, 사회복지사, 물리치료사 등 돌봄 서비스 전문가</p>
+              <Link href={`/${locale}/caregivers/profile`}
+                className="inline-block bg-emerald-700 text-white font-bold px-6 py-3 rounded-xl text-sm hover:bg-emerald-800 transition">
+                요양보호사로 등록하기 →
+              </Link>
+            </div>
+            <div className="bg-blue-50 border-2 border-blue-200 rounded-2xl p-8 text-left hover:border-blue-400 transition group">
+              <div className="text-4xl mb-4">⚖️</div>
+              <h3 className="text-lg font-extrabold text-gray-900 mb-2">법률 · 세무 전문가</h3>
+              <p className="text-sm text-gray-500 mb-6 leading-relaxed">변호사, 세무사, 법무사, 공인회계사 등 법률·세무 상담 전문가</p>
+              <Link href={`/${locale}/specialists/profile`}
+                className="inline-block bg-blue-600 text-white font-bold px-6 py-3 rounded-xl text-sm hover:bg-blue-700 transition">
+                법률·세무 전문가로 등록하기 →
+              </Link>
+            </div>
           </div>
         </div>
       </section>

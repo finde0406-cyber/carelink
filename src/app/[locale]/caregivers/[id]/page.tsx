@@ -65,6 +65,7 @@ export default function CaregiverDetailPage() {
   const [currentUserId, setCurrentUserId] = useState<string | null>(null)
   const [canReview, setCanReview] = useState(false)
   const [canBook, setCanBook] = useState(false)
+  const [canFavorite, setCanFavorite] = useState(false)
   const [reviews, setReviews] = useState<Review[]>([])
   const [hasReviewed, setHasReviewed] = useState(false)
   const [reviewRating, setReviewRating] = useState(0)
@@ -152,6 +153,7 @@ export default function CaregiverDetailPage() {
         }
         setCanReview(hasAcceptedConsult)
         setCanBook(profileData?.role === 'family')
+        setCanFavorite(profileData?.role === 'family')
 
         const { data: favData } = await supabase
           .from('favorites')
@@ -202,7 +204,7 @@ export default function CaregiverDetailPage() {
       caregiver_id: id,
       reviewer_id: currentUserId,
       rating: reviewRating,
-      comment: reviewComment.trim() || null,
+      content: reviewComment.trim() || null,
     })
 
     if (error) {
@@ -282,19 +284,47 @@ export default function CaregiverDetailPage() {
   const reviewCount = reviews.length
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <header className="bg-white border-b border-gray-100 px-4 py-4">
-        <div className="max-w-3xl mx-auto flex items-center justify-between">
-          <Link href={`/${locale}`} className="text-xl font-extrabold text-emerald-700">
-            Care<span className="text-amber-400">Link</span>
-          </Link>
-          <Link href={`/${locale}/search`} className="text-sm text-gray-500 hover:text-gray-700">
-            {t('back')}
-          </Link>
-        </div>
-      </header>
-
+    <div className="min-h-screen bg-gray-50 pt-16">
       <main className="max-w-3xl mx-auto px-4 py-10 space-y-6">
+
+        {/* 미승인 프로필 배너 */}
+        {!caregiver.approved && (
+          <div className="bg-amber-50 border border-amber-200 rounded-2xl px-5 py-4 flex items-center gap-3">
+            <div className="w-9 h-9 rounded-full bg-amber-100 flex items-center justify-center shrink-0">
+              <svg className="w-5 h-5 text-amber-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
+                  d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+            </div>
+            <div>
+              <p className="text-sm font-bold text-amber-800">관리자 승인 대기 중입니다</p>
+              <p className="text-xs text-amber-600">검토가 완료되면 검색에 노출되고 상담 예약을 받을 수 있습니다.</p>
+            </div>
+          </div>
+        )}
+
+        {/* 내 프로필 배너 */}
+        {currentUserId && caregiver.user_id === currentUserId && (
+          <div className="bg-emerald-50 border border-emerald-200 rounded-2xl px-5 py-4 flex items-center justify-between gap-4">
+            <div className="flex items-center gap-3">
+              <div className="w-9 h-9 rounded-full bg-emerald-100 flex items-center justify-center shrink-0">
+                <svg className="w-5 h-5 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
+                    d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                </svg>
+              </div>
+              <div>
+                <p className="text-sm font-bold text-emerald-800">내 프로필입니다</p>
+                <p className="text-xs text-emerald-600">다른 사람에게 이렇게 보입니다</p>
+              </div>
+            </div>
+            <Link
+              href={`/${locale}/caregivers/profile`}
+              className="shrink-0 text-sm font-semibold bg-emerald-700 text-white px-4 py-2 rounded-xl hover:bg-emerald-800 transition">
+              프로필 수정
+            </Link>
+          </div>
+        )}
 
         {/* Hero card */}
         <div className="bg-white border border-gray-200 rounded-2xl p-8">
@@ -321,19 +351,21 @@ export default function CaregiverDetailPage() {
                   <p className="text-sm text-gray-500 mt-1">📍 {caregiver.region}</p>
                 </div>
                 <div className="flex items-center gap-2 shrink-0">
-                  {/* 즐겨찾기 버튼 */}
-                  <button
-                    onClick={toggleFavorite}
-                    disabled={favLoading}
-                    title={isFavorite ? t('favoriteRemove') : t('favoriteAdd')}
-                    className={`w-10 h-10 rounded-full border flex items-center justify-center text-lg
-                      transition disabled:opacity-50
-                      ${isFavorite
-                        ? 'border-red-300 bg-red-50 text-red-500'
-                        : 'border-gray-200 hover:border-red-300 hover:bg-red-50 text-gray-400 hover:text-red-400'
-                      }`}>
-                    {isFavorite ? '♥' : '♡'}
-                  </button>
+                  {/* 즐겨찾기 버튼 — 가족 역할만 표시 */}
+                  {canFavorite && (
+                    <button
+                      onClick={toggleFavorite}
+                      disabled={favLoading}
+                      title={isFavorite ? t('favoriteRemove') : t('favoriteAdd')}
+                      className={`w-10 h-10 rounded-full border flex items-center justify-center text-lg
+                        transition disabled:opacity-50
+                        ${isFavorite
+                          ? 'border-red-300 bg-red-50 text-red-500'
+                          : 'border-gray-200 hover:border-red-300 hover:bg-red-50 text-gray-400 hover:text-red-400'
+                        }`}>
+                      {isFavorite ? '♥' : '♡'}
+                    </button>
+                  )}
                   <span className={`text-xs font-bold px-3 py-1.5 rounded-full
                     ${caregiver.available
                       ? 'bg-emerald-100 text-emerald-700'
@@ -512,8 +544,8 @@ export default function CaregiverDetailPage() {
                     </span>
                   </div>
                   <StarRow rating={r.rating} />
-                  {r.comment && (
-                    <p className="text-sm text-gray-600 leading-relaxed mt-2">{r.comment}</p>
+                  {r.content && (
+                    <p className="text-sm text-gray-600 leading-relaxed mt-2">{r.content}</p>
                   )}
                 </div>
               ))}

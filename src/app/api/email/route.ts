@@ -56,13 +56,38 @@ function ctaButton(href: string, text: string) {
 // ─── 핸들러 ───────────────────────────────────────────────────────────────────
 
 export async function POST(req: NextRequest) {
-  const { type, consultationId } = await req.json()
+  const { type, consultationId, email } = await req.json()
 
-  if (!type || !consultationId) {
+  if (!type) {
     return NextResponse.json({ error: 'Missing params' }, { status: 400 })
   }
 
   const admin = adminClient()
+
+  // ── 프로필 승인 알림 ─────────────────────────────────────────────────────────
+  if (type === 'profile_approved') {
+    if (!email) return NextResponse.json({ ok: true, skipped: 'no email' })
+    try {
+      const body = `
+        <p style="color:#374151;font-size:14px;line-height:1.6;margin:0 0 16px">
+          축하합니다! 프로필 검토가 완료됐습니다. 🎉<br/>
+          이제 CareLink 검색에 노출되며 상담 예약을 받을 수 있습니다.
+        </p>
+        ${ctaButton(`${BASE_URL}/ko/dashboard`, '대시보드 바로가기 →')}
+      `
+      await resend.emails.send({
+        from: FROM,
+        to: email,
+        subject: '[CareLink] 프로필이 승인됐습니다 🎉',
+        html: layout('프로필 승인 완료', body),
+      })
+    } catch {}
+    return NextResponse.json({ ok: true })
+  }
+
+  if (!consultationId) {
+    return NextResponse.json({ error: 'Missing consultationId' }, { status: 400 })
+  }
 
   // 예약 + 관련 정보 조회
   const { data: consult, error: cErr } = await admin
