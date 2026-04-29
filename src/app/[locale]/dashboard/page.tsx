@@ -17,6 +17,7 @@ export default function DashboardPage() {
   const [profile, setProfile] = useState<{ full_name: string; role: string } | null>(null)
   const [isAdmin, setIsAdmin] = useState(false)
   const [loading, setLoading] = useState(true)
+  const [loadError, setLoadError] = useState(false)
   const [showDeleteModal, setShowDeleteModal] = useState(false)
   const [deleting, setDeleting] = useState(false)
   const [showVerifiedBanner, setShowVerifiedBanner] = useState(false)
@@ -30,17 +31,22 @@ export default function DashboardPage() {
 
   useEffect(() => {
     async function load() {
-      const { data: { user } } = await supabase.auth.getUser()
-      if (!user) { router.push(`/${locale}/auth/login`); return }
+      try {
+        const { data: { user } } = await supabase.auth.getUser()
+        if (!user) { router.push(`/${locale}/auth/login`); return }
 
-      const { data } = await supabase
-        .from('profiles')
-        .select('full_name, role')
-        .eq('id', user.id)
-        .single()
+        const { data, error } = await supabase
+          .from('profiles')
+          .select('full_name, role')
+          .eq('id', user.id)
+          .single()
 
-      setProfile(data)
-      setIsAdmin(user.email === 'wldwm83@gmail.com')
+        if (error) throw error
+        setProfile(data)
+        setIsAdmin(user.email === 'wldwm83@gmail.com')
+      } catch {
+        setLoadError(true)
+      }
       setLoading(false)
     }
     load()
@@ -67,6 +73,20 @@ export default function DashboardPage() {
   if (loading) return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50">
       <div className="w-8 h-8 border-4 border-emerald-600 border-t-transparent rounded-full animate-spin" />
+    </div>
+  )
+
+  if (loadError) return (
+    <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4">
+      <div className="text-center">
+        <div className="text-5xl mb-4">⚠️</div>
+        <p className="text-gray-700 font-semibold mb-2">프로필을 불러오지 못했습니다</p>
+        <p className="text-sm text-gray-400 mb-6">네트워크 연결을 확인하고 다시 시도해주세요.</p>
+        <button onClick={() => window.location.reload()}
+          className="bg-emerald-700 text-white px-6 py-2.5 rounded-xl text-sm font-semibold hover:bg-emerald-800 transition">
+          새로고침
+        </button>
+      </div>
     </div>
   )
 

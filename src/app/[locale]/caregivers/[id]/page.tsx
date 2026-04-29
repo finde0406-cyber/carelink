@@ -60,6 +60,7 @@ export default function CaregiverDetailPage() {
 
   const [caregiver, setCaregiver] = useState<CaregiverDetail | null>(null)
   const [loading, setLoading] = useState(true)
+  const [loadError, setLoadError] = useState(false)
 
   const [currentUserId, setCurrentUserId] = useState<string | null>(null)
   const [canReview, setCanReview] = useState(false)
@@ -97,13 +98,15 @@ export default function CaregiverDetailPage() {
 
   useEffect(() => {
     async function load() {
+      try {
       // 프로필 데이터는 비로그인도 조회 가능
-      const { data } = await supabase
+      const { data, error } = await supabase
         .from('caregiver_profiles')
         .select('*, profiles(full_name, avatar_url), caregiver_availability(day_of_week, time_slot)')
         .eq('id', id)
         .single()
 
+      if (error) throw error
       setCaregiver(data as CaregiverDetail)
 
       const reviewData = await loadReviews()
@@ -149,6 +152,10 @@ export default function CaregiverDetailPage() {
       }
 
       setLoading(false)
+      } catch {
+        setLoadError(true)
+        setLoading(false)
+      }
     }
     load()
   }, [id])
@@ -249,10 +256,16 @@ export default function CaregiverDetailPage() {
     </div>
   )
 
-  if (!caregiver) return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50">
+  if (loadError || !caregiver) return (
+    <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4">
       <div className="text-center">
-        <p className="text-gray-500 mb-4">프로필을 찾을 수 없습니다.</p>
+        <div className="text-5xl mb-4">{loadError ? '⚠️' : '🔍'}</div>
+        <p className="text-gray-700 font-semibold mb-2">
+          {loadError ? '프로필을 불러오지 못했습니다' : '프로필을 찾을 수 없습니다'}
+        </p>
+        {loadError && (
+          <p className="text-sm text-gray-400 mb-4">네트워크 연결을 확인하고 다시 시도해주세요.</p>
+        )}
         <Link href={`/${locale}/search`} className="text-emerald-700 font-semibold text-sm hover:underline">
           {t('back')}
         </Link>

@@ -29,7 +29,9 @@ export default function AdminPage() {
   const [tab, setTab] = useState<Tab>('users')
   const [data, setData] = useState<any[]>([])
   const [loading, setLoading] = useState(false)
+  const [apiError, setApiError] = useState<string | null>(null)
   const [deletingId, setDeletingId] = useState<string | null>(null)
+  const [deleteError, setDeleteError] = useState<string | null>(null)
   const [confirm, setConfirm] = useState<{ id: string; table: string; label: string } | null>(null)
   const [stats, setStats] = useState({ users: 0, caregivers: 0, reviews: 0, consultations: 0 })
 
@@ -60,9 +62,16 @@ export default function AdminPage() {
 
   const loadTab = useCallback(async (t: Tab) => {
     setLoading(true)
-    const res = await fetch(`/api/admin?tab=${t}`)
-    const json = await res.json()
-    setData(json.data ?? [])
+    setApiError(null)
+    try {
+      const res = await fetch(`/api/admin?tab=${t}`)
+      if (!res.ok) throw new Error(`서버 오류 (${res.status})`)
+      const json = await res.json()
+      setData(json.data ?? [])
+    } catch (e: any) {
+      setApiError(e.message ?? '데이터를 불러오지 못했습니다.')
+      setData([])
+    }
     setLoading(false)
   }, [])
 
@@ -75,15 +84,21 @@ export default function AdminPage() {
   async function handleDelete() {
     if (!confirm) return
     setDeletingId(confirm.id)
-    await fetch('/api/admin', {
-      method: 'DELETE',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ table: confirm.table, id: confirm.id }),
-    })
-    setConfirm(null)
+    setDeleteError(null)
+    try {
+      const res = await fetch('/api/admin', {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ table: confirm.table, id: confirm.id }),
+      })
+      if (!res.ok) throw new Error('삭제 중 오류가 발생했습니다.')
+      setConfirm(null)
+      loadTab(tab)
+      loadStats()
+    } catch (e: any) {
+      setDeleteError(e.message ?? '삭제 중 오류가 발생했습니다.')
+    }
     setDeletingId(null)
-    loadTab(tab)
-    loadStats()
   }
 
   if (authorized === null) return (
@@ -165,10 +180,68 @@ export default function AdminPage() {
             <div className="flex items-center justify-center py-16">
               <div className="w-8 h-8 border-4 border-emerald-600 border-t-transparent rounded-full animate-spin" />
             </div>
+          ) : apiError ? (
+            <div className="text-center py-16">
+              <p className="text-red-500 text-sm font-medium">{apiError}</p>
+              <button onClick={() => loadTab(tab)}
+                className="mt-3 text-emerald-600 text-sm font-semibold hover:underline">
+                다시 시도
+              </button>
+            </div>
           ) : data.length === 0 ? (
             <div className="text-center py-16 text-gray-400">데이터가 없습니다</div>
           ) : (
-            <div className="overflow-x-auto">
+            {/* 모바일 카드 뷰 (md 미만) */}
+            <div className="md:hidden divide-y divide-gray-50">
+              {data.map((item: any) => (
+                <div key={item.id} className="px-5 py-4 flex items-start justify-between gap-3">
+                  <div className="flex-1 min-w-0 space-y-1">
+                    {tab === 'users' && <>
+                      <p className="font-semibold text-gray-900 text-sm truncate">{item.full_name || '—'}</p>
+                      <p className="text-xs text-gray-400 truncate">{item.email}</p>
+                      <span className={`inline-block text-xs px-2 py-0.5 rounded-full font-semibold
+                        ${item.role === 'caregiver' ? 'bg-emerald-100 text-emerald-700'
+                        : item.role === 'specialist' ? 'bg-blue-100 text-blue-700'
+                        : 'bg-gray-100 text-gray-600'}`}>
+                        {ROLE_LABEL[item.role] ?? item.role}
+                      </span>
+                    </>}
+                    {tab === 'caregivers' && <>
+                      <p className="font-semibold text-gray-900 text-sm">{(item.profiles as any)?.full_name || '—'}</p>
+                      <p className="text-xs text-gray-500">{item.license_type} · {item.region}</p>
+                      <p className="text-xs text-amber-500 font-semibold">★ {(item.avg_rating ?? 0).toFixed(1)} ({item.review_count ?? 0}개)</p>
+                    </>}
+                    {tab === 'reviews' && <>
+                      <p className="font-semibold text-gray-900 text-sm">{item.reviewer_name} → {item.caregiver_name}</p>
+                      <p className="text-xs text-amber-500">{'★'.repeat(item.rating)}{'☆'.repeat(5 - item.rating)}</p>
+                      {item.comment && <p className="text-xs text-gray-500 line-clamp-2">{item.comment}</p>}
+                    </>}
+                    {tab === 'consultations' && <>
+                      <p className="font-semibold text-gray-900 text-sm">{item.family_name} → {item.caregiver_name}</p>
+                      <p className="text-xs text-gray-500">{item.requested_date} {item.requested_time}</p>
+                      <span className={`inline-block text-xs px-2 py-0.5 rounded-full font-semibold ${STATUS_STYLE[item.status]}`}>
+                        {STATUS_LABEL[item.status] ?? item.status}
+                      </span>
+                    </>}
+                  </div>
+                  <button
+                    onClick={() => setConfirm({
+                      id: item.id,
+                      table: tab === 'users' ? 'profiles' : tab === 'caregivers' ? 'caregiver_profiles' : tab,
+                      label: tab === 'users' ? (item.full_name || item.email)
+                           : tab === 'caregivers' ? ((item.profiles as any)?.full_name ?? '') + ' 프로필'
+                           : tab === 'reviews' ? item.reviewer_name + '의 리뷰'
+                           : item.family_name + ' 상담',
+                    })}
+                    className="shrink-0 text-xs text-red-500 border border-red-200 px-2.5 py-1.5 rounded-lg hover:bg-red-50 transition">
+                    삭제
+                  </button>
+                </div>
+              ))}
+            </div>
+
+            {/* 데스크탑 테이블 뷰 (md 이상) */}
+            <div className="hidden md:block overflow-x-auto">
               {/* 사용자 탭 */}
               {tab === 'users' && (
                 <table className="w-full text-sm">
@@ -342,6 +415,7 @@ export default function AdminPage() {
                 </table>
               )}
             </div>
+            </div>
           )}
         </div>
       </main>
@@ -353,7 +427,7 @@ export default function AdminPage() {
           <div className="bg-white rounded-2xl w-full max-w-sm shadow-xl p-6"
             onClick={e => e.stopPropagation()}>
             <h3 className="text-lg font-bold text-gray-900 mb-2">정말 삭제하시겠어요?</h3>
-            <p className="text-sm text-gray-500 mb-6">
+            <p className="text-sm text-gray-500 mb-4">
               <strong className="text-gray-800">{confirm.label}</strong>을(를) 삭제합니다.
               {confirm.table === 'profiles' && (
                 <span className="block mt-1 text-red-500 text-xs">
@@ -361,6 +435,9 @@ export default function AdminPage() {
                 </span>
               )}
             </p>
+            {deleteError && (
+              <p className="text-xs text-red-500 bg-red-50 rounded-xl px-3 py-2 mb-4">{deleteError}</p>
+            )}
             <div className="flex gap-3">
               <button
                 onClick={() => setConfirm(null)}

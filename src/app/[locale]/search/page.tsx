@@ -59,6 +59,7 @@ export default function SearchPage() {
   const [rawResults, setRawResults] = useState<CaregiverCard[]>([])
   const [searched, setSearched] = useState(false)
   const [loading, setLoading] = useState(false)
+  const [searchError, setSearchError] = useState<string | null>(null)
   const [locating, setLocating] = useState(false)
   const [locationMsg, setLocationMsg] = useState<string | null>(null)
   const [showFilter, setShowFilter] = useState(false)
@@ -162,16 +163,22 @@ export default function SearchPage() {
 
   async function handleSearch(e: React.FormEvent) {
     e.preventDefault()
-    setLoading(true); setSearched(true)
-    const region = formatRegion(sido, gungu)
-    let query = supabase
-      .from('caregiver_profiles')
-      .select('*, profiles(full_name, avatar_url), caregiver_availability(day_of_week, time_slot)')
+    setLoading(true); setSearched(true); setSearchError(null)
+    try {
+      const region = formatRegion(sido, gungu)
+      let query = supabase
+        .from('caregiver_profiles')
+        .select('*, profiles(full_name, avatar_url), caregiver_availability(day_of_week, time_slot)')
 
-    if (region) query = query.ilike('region', `%${region}%`)
+      if (region) query = query.ilike('region', `%${region}%`)
 
-    const { data } = await query.limit(50)
-    setRawResults((data as CaregiverCard[]) || [])
+      const { data, error } = await query.limit(50)
+      if (error) throw new Error(error.message)
+      setRawResults((data as CaregiverCard[]) || [])
+    } catch {
+      setSearchError('검색 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요.')
+      setRawResults([])
+    }
     setLoading(false)
   }
 
@@ -357,6 +364,13 @@ export default function SearchPage() {
                 </button>
               </div>
             )}
+          </div>
+        )}
+
+        {/* 에러 */}
+        {searchError && (
+          <div className="bg-red-50 border border-red-200 text-red-600 rounded-2xl px-5 py-4 text-sm mb-6">
+            {searchError}
           </div>
         )}
 
